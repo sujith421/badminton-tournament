@@ -31,8 +31,8 @@
         <button class="nav-link" data-view="bracket">Knockout</button>
       </nav>
       <div class="header-actions">
-        <span id="rolePill" class="role-pill visitor"><span></span> Viewer</span>
-        <button id="adminButton" class="button button-dark">Admin access</button>
+        <span id="rolePill" class="role-pill admin"><span></span> Live editor</span>
+        <button id="adminButton" class="button button-dark">Tournament controls</button>
       </div>
     </header>
 
@@ -127,7 +127,7 @@
 
       <section class="score-help">
         <div><p class="eyebrow"><span></span> Keeping it fair</p><h2>Need to update<br />a score?</h2></div>
-        <div><p>Score changes need the organiser’s approval. Ask for access once, then record the score after your match — everyone sees the result straight away.</p><button id="requestAccessButton" class="button button-light">Request scoring access <span>→</span></button></div>
+        <div><p>Everyone with this link can update scores and tournament settings. Check the match and score carefully before you save — every browser refreshes straight away.</p><button id="requestAccessButton" class="button button-light">Go to score editor <span>→</span></button></div>
       </section>
 
       <section id="rules" class="rules-section">
@@ -143,40 +143,13 @@
 
     <footer><span>Rally Club · Friendly Doubles 2026</span><span>Made for good games & better people.</span></footer>
 
-    <dialog id="accessDialog" class="dialog">
-      <form method="dialog" id="accessForm">
-        <button class="dialog-close" value="cancel" aria-label="Close">×</button>
-        <p class="eyebrow"><span></span> Scorekeeper access</p>
-        <h2>One quick<br /><em>ask.</em></h2>
-        <p class="dialog-copy">Enter your name and the organiser can approve you to record match scores.</p>
-        <label>Your name<input id="requestName" type="text" autocomplete="name" placeholder="e.g. Priya Shah" required /></label>
-        <label>Email for secure score access<input id="requestEmail" type="email" autocomplete="email" placeholder="you@example.com" required /></label>
-        <label>Which pair are you with? <small>(optional)</small><select id="requestTeam"><option value="">Choose a pair</option></select></label>
-        <button class="button button-coral full" type="submit">Send access request <span>→</span></button>
-        <p id="accessMessage" class="form-message"></p>
-      </form>
-    </dialog>
-
-    <dialog id="adminDialog" class="dialog admin-dialog">
-      <form method="dialog" id="adminForm">
-        <button class="dialog-close" value="cancel" aria-label="Close">×</button>
-        <p class="eyebrow"><span></span> Organiser area</p>
-        <h2>Admin<br /><em>access.</em></h2>
-        <p class="dialog-copy">This controls who can update the tournament. Only organisers should continue.</p>
-        <label>Organiser email<input id="adminEmail" type="email" autocomplete="email" placeholder="you@example.com" required /></label>
-        <button class="button button-dark full" type="submit">Email me a sign-in link <span>→</span></button>
-        <p id="adminMessage" class="form-message"></p>
-        <p class="demo-note">For a shared tournament, sign in with your organiser email. We will send a one-time sign-in link.</p>
-      </form>
-    </dialog>
-
     <dialog id="dashboardDialog" class="dialog dashboard-dialog">
       <div>
         <button class="dialog-close" id="dashboardClose" aria-label="Close">×</button>
-        <div class="dashboard-title"><div><p class="eyebrow"><span></span> Organiser area</p><h2>Control room</h2></div><button id="logOutButton" class="text-button">Sign out <span>→</span></button></div>
-        <div class="dashboard-tabs"><button class="dash-tab active" data-dash="requests">Access requests <b id="requestBadge">0</b></button><button class="dash-tab" data-dash="settings">Tournament setup</button></div>
+        <div class="dashboard-title"><div><p class="eyebrow"><span></span> Shared tournament</p><h2>Control room</h2></div><button id="logOutButton" class="text-button">Close <span>→</span></button></div>
+        <div class="dashboard-tabs"><button class="dash-tab active" data-dash="requests">Shared access <b id="requestBadge">∞</b></button><button class="dash-tab" data-dash="settings">Tournament setup</button></div>
         <div id="requestsPanel" class="dash-panel"></div>
-        <div id="settingsPanel" class="dash-panel hidden"><div class="settings-box"><p class="eyebrow"><span></span> Tournament builder</p><h3>Start a fresh tournament</h3><p>Choose the player count, enter names, and generate fixed doubles league pools or a three-round rotation league. The current live tournament is saved to history before the new one begins.</p><button id="newTournamentButton" class="button button-coral">Create new tournament <span>→</span></button><button id="resetButton" class="button button-outline">Reset demo data</button></div><div class="settings-box share-box"><p class="eyebrow"><span></span> Live sharing</p><h3>Share this tournament</h3><p id="cloudStatus">Connect with your organiser email to publish this tournament for live viewing and approved score updates.</p><button id="publishTournamentButton" class="button button-dark">Publish live tournament <span>→</span></button><button id="copyTournamentLinkButton" class="button button-outline" disabled>Copy shareable link</button></div></div>
+        <div id="settingsPanel" class="dash-panel hidden"><div class="settings-box"><p class="eyebrow"><span></span> Tournament builder</p><h3>Start a fresh tournament</h3><p>Choose the player count, enter names, and generate fixed doubles league pools or a three-round rotation league. The current live tournament is saved to history before the new one begins.</p><button id="newTournamentButton" class="button button-coral">Create new tournament <span>→</span></button><button id="resetButton" class="button button-outline">Reset demo data</button></div><div class="settings-box share-box"><p class="eyebrow"><span></span> Live sharing</p><h3>Share this tournament</h3><p id="cloudStatus">Everyone using this link can view and update the shared tournament.</p><button id="publishTournamentButton" class="button button-dark">Publish live tournament <span>→</span></button><button id="copyTournamentLinkButton" class="button button-outline" disabled>Copy shareable link</button></div></div>
       </div>
     </dialog>
 
@@ -210,7 +183,7 @@
     <div id="toast" class="toast" role="status"></div>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-config.js?v=20260919-live-sync"></script>
-    <script src="app.js?v=20260919-live-sync"></script>
+    <script src="app.js?v=20260919-public-live"></script>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(() => {}));
