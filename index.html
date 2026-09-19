@@ -196,12 +196,12 @@
         <h2 id="scoreMatchTitle">Match result</h2>
         <div id="scoreTeams" class="score-teams"></div>
         <p id="scoreFormatHint" class="dialog-copy">Record the single game score. The higher score wins the pool match.</p>
-        <div class="game-scores"><label>One game · points<div><input type="number" min="0" max="30" inputmode="numeric" required aria-label="First pair score" /><strong>—</strong><input type="number" min="0" max="30" inputmode="numeric" required aria-label="Second pair score" /></div></label></div>
+        <div class="game-scores"><p class="score-game-title">One game · points</p><div class="score-name-row"><span id="scoreSideA">First pair</span><span aria-hidden="true"></span><span id="scoreSideB">Second pair</span></div><div class="score-input-row"><input type="number" min="0" max="30" inputmode="numeric" required aria-label="First pair score" /><strong>—</strong><input type="number" min="0" max="30" inputmode="numeric" required aria-label="Second pair score" /></div></div>
         <button class="button button-coral full" type="submit">Save match result <span>→</span></button>
         <p id="scoreMessage" class="form-message"></p>
       </form>
     </dialog>
     <div id="toast" class="toast" role="status"></div>
-    <script src="app.js?v=20260919-score-editor"></script>
+    <script src="app.js?v=20260919-score-names"></script>
   </body>
 </html>
