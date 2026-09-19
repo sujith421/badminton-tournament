@@ -1,17 +1,17 @@
 # Rally Club — Friendly Doubles
 
-A responsive badminton tournament dashboard for eight doubles pairs: two round-robin pools, then quarterfinals, semifinals, and a final.
+A responsive badminton tournament dashboard that generates doubles league groups, knockout seeding, and rotation-league fixtures from the player count you choose.
 
 ## Included
 
-- Live/upcoming/played fixture filters and pool standings.
+- Live/upcoming/played fixture filters and dynamic league standings.
 - Automatic ranking by wins and points difference.
-- Quarterfinal seeding that recalculates as pool results are entered.
+- Knockout draws that scale to the qualifying field: final, semifinals, or quarterfinals.
 - One-game-to-21 score recording with validation for both formats.
 - Scorekeeper access requests and an organiser approval queue.
 - An organiser-only tournament builder for custom player names, venue, and date.
-- A Rotation League option: 16 players are shuffled into four groups of four, partners rotate for three matches per group, and individual points determine advancement and final places.
-- Responsive layout with no build tooling required.
+- A Rotation League option for any 4–64 players, experience-aware 4–5 player group balancing, fair doubles rotations, and individual points for advancement and final places.
+- iPhone- and Android-friendly touch targets, safe-area support, numeric keyboards, and no iOS input zoom.
 
 ## Preview locally
 
@@ -27,9 +27,9 @@ Then visit `http://127.0.0.1:4173`.
 
 The demonstration passcode is `rallyadmin`. Sample tournament data, approved scorers, and results are saved only in that browser's local storage. Use **Control room → Tournament setup → Reset demo data** to restore the supplied state.
 
-To create an event, use **Control room → Tournament setup → Create new tournament**. Enter the event details and the two players in each of eight doubles pairs. Pairs 1–4 are placed in Pool A and pairs 5–8 in Pool B; all round-robin fixtures and the knockout bracket are created for you.
+To create an event, use **Control room → Tournament setup → Create new tournament**. Select an even player count (4–64), enter the two players in every fixed pair, and the app balances pairs across league groups, creates all round-robin fixtures, and seeds a suitable knockout bracket.
 
-Choose **Rotation League** in the same builder to enter 16 individual players instead. The app randomly makes four equal groups of four. Each group plays the three possible doubles partner rotations. When all groups complete a round, players are re-grouped by their placement within their previous group: all first-place players together, then all second-place players, and so on. This happens again for Round 3. The final leaderboard uses every player's accumulated game points from all three rounds.
+Choose **Rotation League** in the same builder to enter any whole number of 4–64 individual players. Assign each player a Beginner, Intermediate, Advanced, or Competitive level. A randomized snake draft shares experience levels across automatically balanced groups of at least four players—for example, 14 players become 4 / 5 / 5. Groups whose size is divisible by four give every player exactly three games per round. A five-player group needs four doubles matches, so one player receives a rotating fourth game while everyone else has three; this avoids leaving a player out. When all groups complete a round, players are re-seeded by their placement within the previous group for Round 2 and again for Round 3. The final leaderboard uses every player's accumulated game points from all three rounds.
 
 ## Friendly rules
 
