@@ -39,16 +39,16 @@ Choose **Rotation League** in the same builder to enter every whole-number playe
 - The top three winners split the remaining birds equally.
 - Four dedicated courts are enough for the tournament. Volunteers rotate booking and supporting these courts; consolidate tournament players there so all four courts remain available for tournament play.
 
-## Live sharing and secure access
+## Live sharing — open editor mode
 
-The published app is connected to Supabase. Tournament state, scorekeeper requests, and approved editors are shared in real time across browsers.
+The published app is connected to Supabase. Everyone who opens the shared link sees the same tournament state and can use all tournament controls: score entry, score corrections, creating a tournament, and sharing the event.
 
-- Sign in with the organiser email from **Admin access**. Supabase emails a one-time link; there is no client-side admin password.
-- In **Control room → Tournament setup**, choose **Publish live tournament**. Then use **Copy shareable link** to send the event page to players.
-- A scorekeeper enters their name and email, follows their one-time sign-in link, and asks for access. Only the organiser can approve that browser account to edit scores.
+- No admin login or player email is required.
+- In **Tournament controls → Tournament setup**, choose **Publish live tournament** once to create the shared event link.
 - Starting a new tournament archives the active one in Supabase before publishing the new event, so completed results remain saved.
+- Anyone with the link can make changes, so use a private group link and check scores before saving.
 
-`supabase-schema.sql` records the database schema, row-level access policies, and real-time publication used by the app. `supabase-config.js` intentionally contains only the public project URL and publishable key; it never contains a database password or a service-role secret.
+`supabase-schema.sql` records the database schema, public live-edit policy, and real-time publication used by the app. `supabase-config.js` intentionally contains only the public project URL and publishable key; it never contains a database password or a service-role secret.
 
 ## Deploy
 
