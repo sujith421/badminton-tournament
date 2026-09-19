@@ -29,12 +29,12 @@ The demonstration passcode is `rallyadmin`. Sample tournament data, approved sco
 
 To create an event, use **Control room → Tournament setup → Create new tournament**. Select an even player count of at least four, enter the two players in every fixed pair, and the app balances pairs across league groups, creates all round-robin fixtures, and seeds a suitable knockout bracket.
 
-Choose **Rotation League** in the same builder to enter every whole-number player count from four upward. Assign each player a Beginner, Intermediate, Advanced, or Competitive level. A randomized snake draft shares experience levels across automatically balanced groups of at least four players—for example, 14 players become 4 / 5 / 5. Groups whose size is divisible by four give every player exactly three games per round. A five-player group needs four doubles matches, so one player receives a rotating fourth game while everyone else has three; this avoids leaving a player out. When all groups complete a round, players are re-seeded by their placement within the previous group for Round 2 and again for Round 3. The final leaderboard uses every player's accumulated game points from all three rounds.
+Choose **Rotation League** in the same builder to enter every whole-number player count from four upward. Assign each player a Beginner, Intermediate, Advanced, or Competitive level. A randomized snake draft shares experience levels across automatically balanced groups of at least four players—for example, 14 players become 4 / 5 / 5. Groups whose size is divisible by four give every player exactly three games per round. A five-player group needs four doubles matches, so one player receives a rotating fourth game while everyone else has three; this avoids leaving a player out. Rotation scoring uses point difference: a 21–12 result gives each winner +9 and each opponent −9. Round 2 grouping uses only Round 1 individual +/− scores; Round 3 grouping uses only Round 2 +/− scores. The final leaderboard uses each player's total +/− from all three rounds.
 
 ## Friendly rules
 
 - Every player brings two birds/shuttles.
-- The top three Rotation League players are determined by total points across every match.
+- The top three Rotation League players are determined by their total +/- across every match.
 - The top three winners split the remaining birds equally.
 
 ## Important for a public launch
