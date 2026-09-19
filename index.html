@@ -7,11 +7,16 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Rally Club" />
+    <meta name="application-name" content="Rally Club" />
+    <meta name="format-detection" content="telephone=no" />
     <title>Rally Club — Friendly Doubles</title>
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="icon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="styles.css?v=20260919-score-team-labels" />
+    <link rel="stylesheet" href="styles.css?v=20260919-live-sync" />
   </head>
   <body>
     <div class="page-noise"></div>
@@ -145,6 +150,7 @@
         <h2>One quick<br /><em>ask.</em></h2>
         <p class="dialog-copy">Enter your name and the organiser can approve you to record match scores.</p>
         <label>Your name<input id="requestName" type="text" autocomplete="name" placeholder="e.g. Priya Shah" required /></label>
+        <label>Email for secure score access<input id="requestEmail" type="email" autocomplete="email" placeholder="you@example.com" required /></label>
         <label>Which pair are you with? <small>(optional)</small><select id="requestTeam"><option value="">Choose a pair</option></select></label>
         <button class="button button-coral full" type="submit">Send access request <span>→</span></button>
         <p id="accessMessage" class="form-message"></p>
@@ -157,10 +163,10 @@
         <p class="eyebrow"><span></span> Organiser area</p>
         <h2>Admin<br /><em>access.</em></h2>
         <p class="dialog-copy">This controls who can update the tournament. Only organisers should continue.</p>
-        <label>Admin passcode<input id="adminPasscode" type="password" placeholder="Enter passcode" required /></label>
-        <button class="button button-dark full" type="submit">Unlock dashboard <span>→</span></button>
+        <label>Organiser email<input id="adminEmail" type="email" autocomplete="email" placeholder="you@example.com" required /></label>
+        <button class="button button-dark full" type="submit">Email me a sign-in link <span>→</span></button>
         <p id="adminMessage" class="form-message"></p>
-        <p class="demo-note">Demo passcode: <code>rallyadmin</code></p>
+        <p class="demo-note">For a shared tournament, sign in with your organiser email. We will send a one-time sign-in link.</p>
       </form>
     </dialog>
 
@@ -170,7 +176,7 @@
         <div class="dashboard-title"><div><p class="eyebrow"><span></span> Organiser area</p><h2>Control room</h2></div><button id="logOutButton" class="text-button">Sign out <span>→</span></button></div>
         <div class="dashboard-tabs"><button class="dash-tab active" data-dash="requests">Access requests <b id="requestBadge">0</b></button><button class="dash-tab" data-dash="settings">Tournament setup</button></div>
         <div id="requestsPanel" class="dash-panel"></div>
-        <div id="settingsPanel" class="dash-panel hidden"><div class="settings-box"><p class="eyebrow"><span></span> Tournament builder</p><h3>Start a fresh tournament</h3><p>Choose the player count, enter names, and generate fixed doubles league pools or a three-round rotation league. This clears the current results and access requests.</p><button id="newTournamentButton" class="button button-coral">Create new tournament <span>→</span></button><button id="resetButton" class="button button-outline">Reset demo data</button></div><div class="settings-box share-box"><h3>Share this tournament</h3><p>This app can be deployed to Netlify, Vercel, or GitHub Pages as a static site. For a public tournament, connect the approval and score data to a secure backend before sharing.</p></div></div>
+        <div id="settingsPanel" class="dash-panel hidden"><div class="settings-box"><p class="eyebrow"><span></span> Tournament builder</p><h3>Start a fresh tournament</h3><p>Choose the player count, enter names, and generate fixed doubles league pools or a three-round rotation league. The current live tournament is saved to history before the new one begins.</p><button id="newTournamentButton" class="button button-coral">Create new tournament <span>→</span></button><button id="resetButton" class="button button-outline">Reset demo data</button></div><div class="settings-box share-box"><p class="eyebrow"><span></span> Live sharing</p><h3>Share this tournament</h3><p id="cloudStatus">Connect with your organiser email to publish this tournament for live viewing and approved score updates.</p><button id="publishTournamentButton" class="button button-dark">Publish live tournament <span>→</span></button><button id="copyTournamentLinkButton" class="button button-outline" disabled>Copy shareable link</button></div></div>
       </div>
     </dialog>
 
@@ -202,6 +208,13 @@
       </form>
     </dialog>
     <div id="toast" class="toast" role="status"></div>
-    <script src="app.js?v=20260919-score-names"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js?v=20260919-live-sync"></script>
+    <script src="app.js?v=20260919-live-sync"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(() => {}));
+      }
+    </script>
   </body>
 </html>
