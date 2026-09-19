@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="styles.css?v=20260919-score-team-labels" />
   </head>
   <body>
     <div class="page-noise"></div>
@@ -196,7 +196,7 @@
         <h2 id="scoreMatchTitle">Match result</h2>
         <div id="scoreTeams" class="score-teams"></div>
         <p id="scoreFormatHint" class="dialog-copy">Record the single game score. The higher score wins the pool match.</p>
-        <div class="game-scores"><p class="score-game-title">One game · points</p><div class="score-name-row"><span id="scoreSideA">First pair</span><span aria-hidden="true"></span><span id="scoreSideB">Second pair</span></div><div class="score-input-row"><input type="number" min="0" max="30" inputmode="numeric" required aria-label="First pair score" /><strong>—</strong><input type="number" min="0" max="30" inputmode="numeric" required aria-label="Second pair score" /></div></div>
+        <div class="game-scores"><p class="score-game-title">One game · points</p><div class="score-name-row"><div class="score-team-label"><small>First team</small><span id="scoreSideA">First pair</span></div><span aria-hidden="true"></span><div class="score-team-label"><small>Second team</small><span id="scoreSideB">Second pair</span></div></div><div class="score-input-row"><input type="number" min="0" max="30" inputmode="numeric" required aria-label="First pair score" /><strong>—</strong><input type="number" min="0" max="30" inputmode="numeric" required aria-label="Second pair score" /></div></div>
         <button class="button button-coral full" type="submit">Save match result <span>→</span></button>
         <p id="scoreMessage" class="form-message"></p>
       </form>
