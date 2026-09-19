@@ -1,0 +1,19 @@
+{
+  "name": "Rally Club — Friendly Doubles",
+  "short_name": "Rally Club",
+  "description": "A friendly badminton tournament dashboard for fixtures, scores, standings, and rotation leagues.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#fffdf8",
+  "theme_color": "#12372a",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
