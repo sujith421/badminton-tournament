@@ -39,9 +39,16 @@ Choose **Rotation League** in the same builder to enter every whole-number playe
 - The top three winners split the remaining birds equally.
 - Four dedicated courts are enough for the tournament. Volunteers rotate booking and supporting these courts; consolidate tournament players there so all four courts remain available for tournament play.
 
-## Important for a public launch
+## Live sharing and secure access
 
-This static version demonstrates the approval journey, but browser local storage and a client-side passcode are not secure access control. Before publishing a public link, move users, access approvals, fixtures, and scores to a backend (for example Supabase or Firebase), enforce organiser/editor roles with server-side authentication and authorization, and store the admin secret only in server-side environment variables.
+The published app is connected to Supabase. Tournament state, scorekeeper requests, and approved editors are shared in real time across browsers.
+
+- Sign in with the organiser email from **Admin access**. Supabase emails a one-time link; there is no client-side admin password.
+- In **Control room → Tournament setup**, choose **Publish live tournament**. Then use **Copy shareable link** to send the event page to players.
+- A scorekeeper enters their name and email, follows their one-time sign-in link, and asks for access. Only the organiser can approve that browser account to edit scores.
+- Starting a new tournament archives the active one in Supabase before publishing the new event, so completed results remain saved.
+
+`supabase-schema.sql` records the database schema, row-level access policies, and real-time publication used by the app. `supabase-config.js` intentionally contains only the public project URL and publishable key; it never contains a database password or a service-role secret.
 
 ## Deploy
 
