@@ -8,6 +8,7 @@ A responsive badminton tournament dashboard that generates doubles league groups
 - Automatic ranking by wins and points difference.
 - Knockout draws that scale to the qualifying field: final, semifinals, or quarterfinals.
 - One-game-to-21 score recording with validation for both formats.
+- Completed scores stay editable for approved scorers and organisers; corrections use the same one-game score form.
 - Scorekeeper access requests and an organiser approval queue.
 - An organiser-only tournament builder for custom player names, venue, and date.
 - A Rotation League option for every whole-number player count from 4 upward, experience-aware group balancing, fair doubles rotations, and individual points for advancement and final places.
