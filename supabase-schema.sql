@@ -97,3 +97,13 @@ alter table public.tournament_editors replica identity full;
 do $$ begin alter publication supabase_realtime add table public.tournaments; exception when duplicate_object then null; end $$;
 do $$ begin alter publication supabase_realtime add table public.tournament_editor_requests; exception when duplicate_object then null; end $$;
 do $$ begin alter publication supabase_realtime add table public.tournament_editors; exception when duplicate_object then null; end $$;
+
+-- Open editor mode: every visitor may create and update shared tournaments.
+alter table public.tournaments alter column owner_id drop not null;
+drop policy if exists tournament_owner_insert on public.tournaments;
+drop policy if exists tournament_owner_or_editor_update on public.tournaments;
+drop policy if exists tournament_public_insert on public.tournaments;
+drop policy if exists tournament_public_update on public.tournaments;
+create policy tournament_public_insert on public.tournaments for insert to anon, authenticated with check (true);
+create policy tournament_public_update on public.tournaments for update to anon, authenticated using (true) with check (true);
+grant insert, update on public.tournaments to anon, authenticated;
