@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#12372A" />
+    <title>Rally Club — Friendly Doubles</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="page-noise"></div>
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="Rally Club home">
+        <span class="brand-mark"><i></i><i></i><i></i></span>
+        <span>RALLY<br /><em>CLUB</em></span>
+      </a>
+      <nav class="topnav" aria-label="Tournament navigation">
+        <button class="nav-link active" data-view="overview">Overview</button>
+        <button class="nav-link" data-view="fixtures">Fixtures</button>
+        <button class="nav-link" data-view="bracket">Knockout</button>
+      </nav>
+      <div class="header-actions">
+        <span id="rolePill" class="role-pill visitor"><span></span> Viewer</span>
+        <button id="adminButton" class="button button-dark">Admin access</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow"><span></span> <span id="eventDate">Saturday, 21 September · 09:00</span></p>
+          <h1><span id="eventName">Friendly doubles,</span><br /><em>serious</em> fun.</h1>
+          <p id="heroDescription" class="hero-text">Eight pairs. One good Saturday. Follow the pool stage, celebrate every rally, and see who takes the court in the final.</p>
+          <div class="hero-cta-row">
+            <button class="button button-coral" data-scroll="fixtures">View today's matches <span>↓</span></button>
+            <div class="venue"><strong id="eventVenue">Rally Club Courts</strong><span>4 Willow Lane · Court 1–4</span></div>
+          </div>
+        </div>
+        <div class="hero-art" aria-label="Badminton shuttlecock illustration">
+          <div class="sun"></div>
+          <div class="court-line line-a"></div><div class="court-line line-b"></div><div class="court-line line-c"></div>
+          <div class="shuttle"><div class="feathers"><b></b><b></b><b></b><b></b><b></b></div><div class="shuttle-band"></div><div class="shuttle-head"></div></div>
+          <p>RALLY 2026</p>
+        </div>
+      </section>
+
+      <section id="overview" class="content-section overview-section view-section">
+        <div class="section-heading">
+          <div><p class="eyebrow"><span></span> Live tournament desk</p><h2>At a glance</h2></div>
+          <div class="live-clock"><span class="pulse"></span><span id="liveStatus">2 courts live</span><time id="clock">09:42</time></div>
+        </div>
+        <div class="stats-grid">
+          <article><span class="stat-number" id="playedCount">4</span><span class="stat-label">Matches played</span></article>
+          <article><span class="stat-number" id="remainingCount">8</span><span class="stat-label">Still to play</span></article>
+          <article><span class="stat-number">2</span><span class="stat-label">Pools · 4 pairs each</span></article>
+          <article class="accent-stat"><span class="stat-number">21</span><span class="stat-label">Points to win a game</span></article>
+        </div>
+        <div class="dashboard-grid">
+          <article class="next-match-card">
+            <div class="card-topline"><p class="eyebrow"><span></span> Up next</p><span class="court-chip">Court 2 · 10:15</span></div>
+            <div id="nextMatch"></div>
+            <button class="text-button" data-scroll="fixtures">See all fixtures <span>→</span></button>
+          </article>
+          <article class="how-card">
+            <p class="eyebrow"><span></span> How it works</p>
+            <h3>Pool play to<br />the podium.</h3>
+            <ol class="format-steps"><li><b>01</b><span>Every pair plays three pool games.</span></li><li><b>02</b><span>Top four from each pool enter quarters.</span></li><li><b>03</b><span>Win three knockout rounds to lift it.</span></li></ol>
+            <button class="text-button" data-view-target="bracket">See the knockout path <span>→</span></button>
+          </article>
+        </div>
+      </section>
+
+      <section id="fixtures" class="content-section fixtures-section view-section">
+        <div class="section-heading fixtures-heading">
+          <div><p class="eyebrow"><span></span> Pool stage</p><h2>Fixtures & results</h2></div>
+          <div class="fixture-tabs" role="tablist"><button class="filter-tab active" data-filter="all">All</button><button class="filter-tab" data-filter="live">Live now</button><button class="filter-tab" data-filter="upcoming">Upcoming</button><button class="filter-tab" data-filter="complete">Played</button></div>
+        </div>
+        <div class="fixtures-layout">
+          <div class="fixture-list-wrap">
+            <div class="list-title"><span>Pool fixtures</span><small id="fixtureFormatNote">1 game · 21 points</small></div>
+            <div id="fixturesList" class="fixtures-list"></div>
+          </div>
+          <aside class="standings-panel">
+            <div class="standings-head"><p id="standingsTitle">Pool standings</p><div id="poolToggle" class="pool-toggle"><button class="pool-toggle-btn active" data-pool="A">A</button><button class="pool-toggle-btn" data-pool="B">B</button></div></div>
+            <div id="standings"></div>
+            <p class="standings-note">Ranked by wins, then points difference.</p>
+          </aside>
+        </div>
+      </section>
+
+      <section id="bracket" class="content-section bracket-section view-section">
+        <div class="section-heading">
+          <div><p class="eyebrow"><span></span> The business end</p><h2>Knockout bracket</h2></div>
+          <div class="bracket-key"><span><i class="key-win"></i> Advances</span><span><i></i> To be played</span></div>
+        </div>
+        <div class="bracket-wrap">
+          <div class="round-labels"><span>Quarterfinals</span><span>Semifinals</span><span>Final</span></div>
+          <div id="bracketGrid" class="bracket-grid"></div>
+        </div>
+      </section>
+
+      <section class="score-help">
+        <div><p class="eyebrow"><span></span> Keeping it fair</p><h2>Need to update<br />a score?</h2></div>
+        <div><p>Score changes need the organiser’s approval. Ask for access once, then record the score after your match — everyone sees the result straight away.</p><button id="requestAccessButton" class="button button-light">Request scoring access <span>→</span></button></div>
+      </section>
+
+      <section id="rules" class="rules-section">
+        <div><p class="eyebrow"><span></span> Friendly rules</p><h2>Come ready<br />to rally.</h2></div>
+        <div class="rules-list">
+          <article><b>01</b><div><h3>Bring two shuttles</h3><p>Every player brings 2 birds/shuttles to contribute to the day.</p></div></article>
+          <article><b>02</b><div><h3 id="formatRuleTitle">Play your pool</h3><p id="formatRuleText">Fixed doubles pairs play a round robin in their pool before the knockout rounds begin.</p></div></article>
+          <article><b>03</b><div><h3>Share the spoils</h3><p>The top 3 winners split all remaining birds equally.</p></div></article>
+        </div>
+      </section>
+    </main>
+
+    <footer><span>Rally Club · Friendly Doubles 2026</span><span>Made for good games & better people.</span></footer>
+
+    <dialog id="accessDialog" class="dialog">
+      <form method="dialog" id="accessForm">
+        <button class="dialog-close" value="cancel" aria-label="Close">×</button>
+        <p class="eyebrow"><span></span> Scorekeeper access</p>
+        <h2>One quick<br /><em>ask.</em></h2>
+        <p class="dialog-copy">Enter your name and the organiser can approve you to record match scores.</p>
+        <label>Your name<input id="requestName" type="text" autocomplete="name" placeholder="e.g. Priya Shah" required /></label>
+        <label>Which pair are you with? <small>(optional)</small><select id="requestTeam"><option value="">Choose a pair</option></select></label>
+        <button class="button button-coral full" type="submit">Send access request <span>→</span></button>
+        <p id="accessMessage" class="form-message"></p>
+      </form>
+    </dialog>
+
+    <dialog id="adminDialog" class="dialog admin-dialog">
+      <form method="dialog" id="adminForm">
+        <button class="dialog-close" value="cancel" aria-label="Close">×</button>
+        <p class="eyebrow"><span></span> Organiser area</p>
+        <h2>Admin<br /><em>access.</em></h2>
+        <p class="dialog-copy">This controls who can update the tournament. Only organisers should continue.</p>
+        <label>Admin passcode<input id="adminPasscode" type="password" placeholder="Enter passcode" required /></label>
+        <button class="button button-dark full" type="submit">Unlock dashboard <span>→</span></button>
+        <p id="adminMessage" class="form-message"></p>
+        <p class="demo-note">Demo passcode: <code>rallyadmin</code></p>
+      </form>
+    </dialog>
+
+    <dialog id="dashboardDialog" class="dialog dashboard-dialog">
+      <div>
+        <button class="dialog-close" id="dashboardClose" aria-label="Close">×</button>
+        <div class="dashboard-title"><div><p class="eyebrow"><span></span> Organiser area</p><h2>Control room</h2></div><button id="logOutButton" class="text-button">Sign out <span>→</span></button></div>
+        <div class="dashboard-tabs"><button class="dash-tab active" data-dash="requests">Access requests <b id="requestBadge">0</b></button><button class="dash-tab" data-dash="settings">Tournament setup</button></div>
+        <div id="requestsPanel" class="dash-panel"></div>
+        <div id="settingsPanel" class="dash-panel hidden"><div class="settings-box"><p class="eyebrow"><span></span> Tournament builder</p><h3>Start a fresh bracket</h3><p>Create an eight-pair doubles tournament with your own player names. This clears the current results and access requests, then generates two pools and the knockout path.</p><button id="newTournamentButton" class="button button-coral">Create new tournament <span>→</span></button><button id="resetButton" class="button button-outline">Reset demo data</button></div><div class="settings-box share-box"><h3>Share this tournament</h3><p>This app can be deployed to Netlify, Vercel, or GitHub Pages as a static site. For a public tournament, connect the approval and score data to a secure backend before sharing.</p></div></div>
+      </div>
+    </dialog>
+
+    <dialog id="newTournamentDialog" class="dialog new-tournament-dialog">
+      <form method="dialog" id="newTournamentForm">
+        <button class="dialog-close" value="cancel" aria-label="Close">×</button>
+        <p class="eyebrow"><span></span> Tournament builder</p>
+        <h2>New doubles<br /><em>tournament.</em></h2>
+        <p id="newTournamentIntro" class="dialog-copy">Add eight pairs (16 players). Pairs 1–4 start in Pool A and pairs 5–8 in Pool B. Fixtures and the knockout draw are generated automatically.</p>
+        <div class="event-fields"><label>Tournament name<input id="newEventName" type="text" maxlength="42" placeholder="e.g. Sunday Smash" required /></label><label>Date<input id="newEventDate" type="date" required /></label><label class="event-venue-label">Venue<input id="newEventVenue" type="text" maxlength="50" placeholder="e.g. Riverside Sports Hall" required /></label><label class="format-label">Format<select id="newFormat"><option value="teams">Fixed doubles · pools to knockout</option><option value="rotation">Rotation League · individual leaderboard</option></select></label></div>
+        <p id="formatBuilderHelp" class="builder-help">Enter eight fixed pairs. Pairs 1–4 start in Pool A and pairs 5–8 in Pool B.</p>
+        <div class="pair-builder-heading"><strong id="playerBuilderTitle">Your doubles pairs</strong><span id="playerCountLabel">16 players</span></div>
+        <div id="playerPairs" class="player-pairs"></div>
+        <p id="newTournamentMessage" class="form-message"></p>
+        <div class="dialog-actions"><button id="newTournamentCancel" class="button button-outline" type="button">Cancel</button><button class="button button-coral" type="submit">Create tournament <span>→</span></button></div>
+      </form>
+    </dialog>
+
+    <dialog id="scoreDialog" class="dialog score-dialog">
+      <form method="dialog" id="scoreForm">
+        <button class="dialog-close" value="cancel" aria-label="Close">×</button>
+        <p class="eyebrow"><span></span> Record result</p>
+        <h2 id="scoreMatchTitle">Match result</h2>
+        <div id="scoreTeams" class="score-teams"></div>
+        <p id="scoreFormatHint" class="dialog-copy">Record the single game score. The higher score wins the pool match.</p>
+        <div class="game-scores"><label>Game 1<div><input type="number" min="0" max="30" required /><strong>—</strong><input type="number" min="0" max="30" required /></div></label><label id="game2Field">Game 2<div><input type="number" min="0" max="30" /><strong>—</strong><input type="number" min="0" max="30" /></div></label><label id="game3Field">Game 3 <small>(if needed)</small><div><input type="number" min="0" max="30" /><strong>—</strong><input type="number" min="0" max="30" /></div></label></div>
+        <button class="button button-coral full" type="submit">Save match result <span>→</span></button>
+        <p id="scoreMessage" class="form-message"></p>
+      </form>
+    </dialog>
+    <div id="toast" class="toast" role="status"></div>
+    <script src="app.js"></script>
+  </body>
+</html>
