@@ -36,6 +36,7 @@ Choose **Rotation League** in the same builder to enter every whole-number playe
 - Every player brings two birds/shuttles.
 - The top three Rotation League players are determined by their total +/- across every match.
 - The top three winners split the remaining birds equally.
+- Four dedicated courts are enough for the tournament. Volunteers rotate booking and supporting these courts; consolidate tournament players there so all four courts remain available for tournament play.
 
 ## Important for a public launch
 
