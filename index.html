@@ -2,8 +2,11 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#12372A" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <title>Rally Club — Friendly Doubles</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -47,6 +50,20 @@
         </div>
       </section>
 
+      <section id="quickRules" class="quick-rules" aria-labelledby="quickRulesTitle">
+        <div class="quick-rules-intro">
+          <p class="eyebrow"><span></span> Game day rules</p>
+          <h2 id="quickRulesTitle">Good rallies start<br />with good <em>habits.</em></h2>
+          <p>Everything you need for a smooth, friendly tournament—right before the action begins.</p>
+        </div>
+        <div class="quick-rules-grid">
+          <article><b>01</b><h3>Bring two shuttles</h3><p>Every player contributes 2 birds/shuttles for the day.</p></article>
+          <article><b>02</b><h3>One game to 21</h3><p>Every fixture is decided in one game. The higher score wins.</p></article>
+          <article><b>03</b><h3 id="quickFormatRuleTitle">Play your league</h3><p id="quickFormatRuleText">Fixed pairs play their scheduled round robin before the knockout draw.</p></article>
+          <article><b>04</b><h3>Share the spoils</h3><p>The top 3 winners split the remaining birds equally.</p></article>
+        </div>
+      </section>
+
       <section id="overview" class="content-section overview-section view-section">
         <div class="section-heading">
           <div><p class="eyebrow"><span></span> Live tournament desk</p><h2>At a glance</h2></div>
@@ -55,7 +72,7 @@
         <div class="stats-grid">
           <article><span class="stat-number" id="playedCount">4</span><span class="stat-label">Matches played</span></article>
           <article><span class="stat-number" id="remainingCount">8</span><span class="stat-label">Still to play</span></article>
-          <article><span class="stat-number">2</span><span class="stat-label">Pools · 4 pairs each</span></article>
+          <article><span id="formatStatNumber" class="stat-number">2</span><span id="formatStatLabel" class="stat-label">Pools · 4 pairs each</span></article>
           <article class="accent-stat"><span class="stat-number">21</span><span class="stat-label">Points to win a game</span></article>
         </div>
         <div class="dashboard-grid">
@@ -66,8 +83,8 @@
           </article>
           <article class="how-card">
             <p class="eyebrow"><span></span> How it works</p>
-            <h3>Pool play to<br />the podium.</h3>
-            <ol class="format-steps"><li><b>01</b><span>Every pair plays three pool games.</span></li><li><b>02</b><span>Top four from each pool enter quarters.</span></li><li><b>03</b><span>Win three knockout rounds to lift it.</span></li></ol>
+            <h3 id="formatGuideTitle">Pool play to<br />the podium.</h3>
+            <ol id="formatGuideSteps" class="format-steps"><li><b>01</b><span>Every pair plays three pool games.</span></li><li><b>02</b><span>Top four from each pool enter quarters.</span></li><li><b>03</b><span>Win three knockout rounds to lift it.</span></li></ol>
             <button class="text-button" data-view-target="bracket">See the knockout path <span>→</span></button>
           </article>
         </div>
@@ -75,12 +92,12 @@
 
       <section id="fixtures" class="content-section fixtures-section view-section">
         <div class="section-heading fixtures-heading">
-          <div><p class="eyebrow"><span></span> Pool stage</p><h2>Fixtures & results</h2></div>
+          <div><p id="fixturesEyebrow" class="eyebrow"><span></span> Pool stage</p><h2>Fixtures & results</h2></div>
           <div class="fixture-tabs" role="tablist"><button class="filter-tab active" data-filter="all">All</button><button class="filter-tab" data-filter="live">Live now</button><button class="filter-tab" data-filter="upcoming">Upcoming</button><button class="filter-tab" data-filter="complete">Played</button></div>
         </div>
         <div class="fixtures-layout">
           <div class="fixture-list-wrap">
-            <div class="list-title"><span>Pool fixtures</span><small id="fixtureFormatNote">1 game · 21 points</small></div>
+            <div class="list-title"><span id="fixturesTitle">Pool fixtures</span><small id="fixtureFormatNote">1 game · 21 points</small></div>
             <div id="fixturesList" class="fixtures-list"></div>
           </div>
           <aside class="standings-panel">
@@ -151,7 +168,7 @@
         <div class="dashboard-title"><div><p class="eyebrow"><span></span> Organiser area</p><h2>Control room</h2></div><button id="logOutButton" class="text-button">Sign out <span>→</span></button></div>
         <div class="dashboard-tabs"><button class="dash-tab active" data-dash="requests">Access requests <b id="requestBadge">0</b></button><button class="dash-tab" data-dash="settings">Tournament setup</button></div>
         <div id="requestsPanel" class="dash-panel"></div>
-        <div id="settingsPanel" class="dash-panel hidden"><div class="settings-box"><p class="eyebrow"><span></span> Tournament builder</p><h3>Start a fresh bracket</h3><p>Create an eight-pair doubles tournament with your own player names. This clears the current results and access requests, then generates two pools and the knockout path.</p><button id="newTournamentButton" class="button button-coral">Create new tournament <span>→</span></button><button id="resetButton" class="button button-outline">Reset demo data</button></div><div class="settings-box share-box"><h3>Share this tournament</h3><p>This app can be deployed to Netlify, Vercel, or GitHub Pages as a static site. For a public tournament, connect the approval and score data to a secure backend before sharing.</p></div></div>
+        <div id="settingsPanel" class="dash-panel hidden"><div class="settings-box"><p class="eyebrow"><span></span> Tournament builder</p><h3>Start a fresh tournament</h3><p>Choose the player count, enter names, and generate fixed doubles league pools or a three-round rotation league. This clears the current results and access requests.</p><button id="newTournamentButton" class="button button-coral">Create new tournament <span>→</span></button><button id="resetButton" class="button button-outline">Reset demo data</button></div><div class="settings-box share-box"><h3>Share this tournament</h3><p>This app can be deployed to Netlify, Vercel, or GitHub Pages as a static site. For a public tournament, connect the approval and score data to a secure backend before sharing.</p></div></div>
       </div>
     </dialog>
 
@@ -160,9 +177,9 @@
         <button class="dialog-close" value="cancel" aria-label="Close">×</button>
         <p class="eyebrow"><span></span> Tournament builder</p>
         <h2>New doubles<br /><em>tournament.</em></h2>
-        <p id="newTournamentIntro" class="dialog-copy">Add eight pairs (16 players). Pairs 1–4 start in Pool A and pairs 5–8 in Pool B. Fixtures and the knockout draw are generated automatically.</p>
-        <div class="event-fields"><label>Tournament name<input id="newEventName" type="text" maxlength="42" placeholder="e.g. Sunday Smash" required /></label><label>Date<input id="newEventDate" type="date" required /></label><label class="event-venue-label">Venue<input id="newEventVenue" type="text" maxlength="50" placeholder="e.g. Riverside Sports Hall" required /></label><label class="format-label">Format<select id="newFormat"><option value="teams">Fixed doubles · pools to knockout</option><option value="rotation">Rotation League · individual leaderboard</option></select></label></div>
-        <p id="formatBuilderHelp" class="builder-help">Enter eight fixed pairs. Pairs 1–4 start in Pool A and pairs 5–8 in Pool B.</p>
+        <p id="newTournamentIntro" class="dialog-copy">Choose your player count, then add names. The fixture list and knockout draw are generated automatically.</p>
+        <div class="event-fields"><label>Tournament name<input id="newEventName" type="text" maxlength="42" placeholder="e.g. Sunday Smash" required /></label><label>Date<input id="newEventDate" type="date" required /></label><label class="event-venue-label">Venue<input id="newEventVenue" type="text" maxlength="50" placeholder="e.g. Riverside Sports Hall" required /></label><label class="format-label">Format<select id="newFormat"><option value="teams">Fixed doubles · league to knockout</option><option value="rotation">Rotation League · individual leaderboard</option></select></label><label class="player-count-field">Number of players<input id="newPlayerCount" type="number" min="4" max="64" step="2" value="16" inputmode="numeric" required /></label></div>
+        <p id="formatBuilderHelp" class="builder-help">Enter an even number of players. The app creates fixed pairs, balanced round-robin pools, and the suitable knockout stage.</p>
         <div class="pair-builder-heading"><strong id="playerBuilderTitle">Your doubles pairs</strong><span id="playerCountLabel">16 players</span></div>
         <div id="playerPairs" class="player-pairs"></div>
         <p id="newTournamentMessage" class="form-message"></p>
