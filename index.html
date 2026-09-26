@@ -107,7 +107,10 @@
       <section id="fixtures" class="content-section fixtures-section view-section">
         <div class="section-heading fixtures-heading">
           <div><p id="fixturesEyebrow" class="eyebrow"><span></span> Pool stage</p><h2>Fixtures & results</h2></div>
-          <div class="fixture-tabs" role="tablist"><button class="filter-tab active" data-filter="all">All</button><button class="filter-tab" data-filter="live">Live now</button><button class="filter-tab" data-filter="upcoming">Upcoming</button><button class="filter-tab" data-filter="complete">Played</button></div>
+          <div class="fixture-filter-tools">
+            <div class="fixture-tabs" role="tablist"><button class="filter-tab active" data-filter="all">All</button><button class="filter-tab" data-filter="live">Live now</button><button class="filter-tab" data-filter="upcoming">Upcoming</button><button class="filter-tab" data-filter="complete">Played</button><button class="filter-tab" data-filter="team">Find team</button></div>
+            <label id="teamFixtureControl" class="team-fixture-control" hidden>Team<select id="teamFixtureSelect" aria-label="Choose a team to view its fixtures"></select></label>
+          </div>
         </div>
         <div class="fixtures-layout">
           <div class="fixture-list-wrap">
@@ -191,7 +194,7 @@
     <div id="toast" class="toast" role="status"></div>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-config.js?v=20260919-live-sync"></script>
-    <script src="app.js?v=20260926-podium"></script>
+    <script src="app.js?v=20260926-team-fixtures"></script>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(() => {}));
