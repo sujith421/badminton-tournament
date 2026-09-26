@@ -170,3 +170,103 @@ $$('[data-view-target]').forEach(b=>b.onclick=()=>$('#'+b.dataset.viewTarget).sc
 setInterval(()=>{$('#clock').textContent=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});},1000);
 renderTeamsSelect();renderAll();
 initialiseCloud();
+
+// Fixed doubles uses one complete league: every pair meets every other pair once.
+function pairKey(a,b){return [a,b].sort().join('::');}
+function generatedMatches(teams){
+  const matches=[];
+  for(let firstIndex=0;firstIndex<teams.length;firstIndex++)for(let secondIndex=firstIndex+1;secondIndex<teams.length;secondIndex++){
+    const slot=Math.floor(matches.length/4),minutes=9*60+slot*75,time=String(Math.floor(minutes/60)).padStart(2,'0')+':'+String(minutes%60).padStart(2,'0');
+    matches.push({id:'league-'+pairKey(teams[firstIndex].id,teams[secondIndex].id),pool:'League',stage:'league',court:'Court '+((matches.length%4)+1),time,a:teams[firstIndex].id,b:teams[secondIndex].id,status:'upcoming',games:[]});
+  }
+  return matches;
+}
+function ensureSingleLeague(){
+  if(isRotation()||!data.teams?.length||data.tournament.leagueStyle==='single')return;
+  const previous=new Map(data.matches.filter(match=>match.stage!=='playoff').map(match=>[pairKey(match.a,match.b),match]));
+  data.teams.forEach(item=>{item.pool='League';});
+  data.matches=generatedMatches(data.teams).map(match=>{
+    const old=previous.get(pairKey(match.a,match.b));
+    return old?{...match,status:old.status,games:old.games||[]}:match;
+  });
+  data.tournament.leagueStyle='single';
+}
+function standings(){
+  const rows=data.teams.map(item=>({team:item,played:0,wins:0,losses:0,for:0,against:0}));
+  data.matches.filter(match=>match.stage!=='playoff'&&match.status==='complete').forEach(match=>{
+    const a=rows.find(row=>row.team.id===match.a),b=rows.find(row=>row.team.id===match.b),winner=matchWinner(match);
+    if(!a||!b)return;
+    a.played++;b.played++;
+    if(winner===match.a){a.wins++;b.losses++;}else if(winner===match.b){b.wins++;a.losses++;}
+    (match.games||[]).forEach(score=>{a.for+=score[0];a.against+=score[1];b.for+=score[1];b.against+=score[0];});
+  });
+  return rows.sort((a,b)=>b.wins-a.wins||(b.for-b.against)-(a.for-a.against)||b.for-a.for);
+}
+function poolIds(){return isRotation()?[]:['League'];}
+function renderNext(){
+  if(isRotation()){const match=rotationMatches().find(item=>item.status==='upcoming');if(!match){$('#nextMatch').innerHTML='<p class="rotation-ready">All three rounds are complete. See the leaderboard below.</p>';return;}$('#nextMatch').innerHTML='<div class="next-match rotation-next"><div class="rotation-pair"><span>'+rotationPair(match.a)+'</span><small>Round '+match.round+' · '+match.group+'</small></div><div class="versus">VS<br><small>GROUP GAME '+match.slot+'</small></div><div class="rotation-pair reverse"><span>'+rotationPair(match.b)+'</span><small>Round '+match.round+' · '+match.group+'</small></div></div>';return;}
+  const match=data.matches.find(item=>item.status==='live')||data.matches.find(item=>item.status==='upcoming');if(!match)return;
+  const label=match.stage==='playoff'?(match.playoffLabel||'PLAYOFF'):'FULL LEAGUE';
+  $('#nextMatch').innerHTML='<div class="next-match">'+teamBlock(team(match.a))+'<div class="versus">VS<br><small>'+label+'</small></div>'+teamBlock(team(match.b),true)+'</div>';
+}
+function renderStats(){
+  const matches=isRotation()?rotationMatches():data.matches,done=matches.filter(match=>match.status==='complete').length,left=Math.max(0,matches.length-done);
+  $('#playedCount').textContent=done;$('#remainingCount').textContent=left;
+  if(isRotation()){
+    const sizes=data.rotation?.groupSizes||data.rotation?.rounds[0]?.groups.map(group=>group.playerIds.length)||[4],label=[...new Set(sizes)].join('–');
+    $('#liveStatus').textContent='Round '+data.rotation.rounds.length+' of 3';$('#formatStatNumber').textContent=data.rotation.rounds[0].groups.length;$('#formatStatLabel').textContent=data.players.length+' players · groups of '+label;
+  }else{
+    $('#liveStatus').textContent=matches.filter(match=>match.status==='live').length+' courts live';$('#formatStatNumber').textContent=data.teams.length;$('#formatStatLabel').textContent='fixed pairs · full round robin';
+  }
+}
+function renderTournamentMeta(){
+  $('#eventName').textContent=data.tournament.name;$('#eventDate').textContent=data.tournament.date;$('#eventVenue').textContent=data.tournament.venue;
+  if(isRotation()){
+    const sizes=data.rotation.groupSizes||data.rotation.rounds[0].groups.map(group=>group.playerIds.length),count=sizes.length,text=sizes.join(' / '),exact=sizes.every(size=>size%4===0);
+    $('#heroDescription').textContent=data.players.length+' players rotate partners in '+count+' balanced groups ('+text+' players), matched by experience level.';
+    $('#formatGuideTitle').innerHTML='Rotate. Rank.<br />Regroup.';
+    $('#formatGuideSteps').innerHTML='<li><b>01</b><span>Experience levels are balanced across groups of '+text+' players.</span></li><li><b>02</b><span>'+(exact?'Every player gets exactly three doubles games each round.':'Groups with 5+ players use a fair 3–4 game rotation.')+'</span></li><li><b>03</b><span>Round 2 uses Round 1 +/- only; Round 3 uses Round 2 +/- only. Total +/- decides the podium.</span></li>';
+  }else{
+    $('#heroDescription').textContent=data.teams.length+' fixed pairs play one full round-robin league: every pair meets every other pair once. The top four enter the double-chance playoff.';
+    $('#formatGuideTitle').innerHTML='One league.<br />Four playoff teams.';
+    $('#formatGuideSteps').innerHTML='<li><b>01</b><span>Every pair plays all other '+(data.teams.length-1)+' pairs once.</span></li><li><b>02</b><span>The top 4 qualify for the playoff.</span></li><li><b>03</b><span>#1 vs #2 decides the first finalist; #3 vs #4 begins the second path.</span></li>';
+  }
+}
+function renderRules(){
+  if(isRotation()){
+    const sizes=data.rotation.groupSizes||data.rotation.rounds[0].groups.map(group=>group.playerIds.length);$('#formatRuleTitle').textContent='Rotate, rank, regroup';$('#formatRuleText').textContent='Each player receives the match point difference: 21–12 is +9 for the winners and −9 for the opponents. Round 2 groups use Round 1 +/- only; Round 3 groups use Round 2 +/- only. The top 3 are decided by total +/−.';$('#quickFormatRuleTitle').textContent='Balanced rotations';$('#quickFormatRuleText').textContent='Experience-aware groups of '+sizes.join(' / ')+' play for +/- points across all three rounds.';
+  }else{
+    $('#formatRuleTitle').textContent='One full league';$('#formatRuleText').textContent='Every fixed doubles pair meets every other pair once. The top 4 progress to a double-chance playoff: #1 vs #2 sends its winner to the final; #3 vs #4 meets the #1/#2 loser for the other final place.';$('#quickFormatRuleTitle').textContent='Full round robin';$('#quickFormatRuleText').textContent='Every pair plays all other '+(data.teams.length-1)+' pairs once before the top-four playoff.';
+  }
+}
+function renderBracket(){
+  if(isRotation()){renderRotationProgress();return;}
+  const ranked=overallTeamRankings(),seeds=ranked.slice(0,4).map(row=>row.team);
+  $('.bracket-section .eyebrow').innerHTML='<span></span> Top-four playoff';$('.bracket-section h2').textContent='Double-chance path';$('.bracket-key').innerHTML='<span><i class="key-win"></i> #1/#2 winner goes straight to final</span><span><i></i> #3/#4 winner faces the #1/#2 loser</span>';
+  $('.round-labels').className='round-labels dynamic-bracket-labels';$('.round-labels').style.setProperty('--bracket-columns',3);$('.round-labels').innerHTML='<span>Final place 1</span><span>Final qualifier</span><span>Final</span>';
+  $('#bracketGrid').className='bracket-grid dynamic-bracket-grid';$('#bracketGrid').style.setProperty('--bracket-columns',3);
+  if(seeds.length<4){$('#bracketGrid').innerHTML='<p class="rotation-ready">Add at least four pairs to unlock the top-four playoff.</p>';return;}
+  const firstFinalist=bracketCard('1 vs 2 · winner to final',seeds[0],seeds[1]);
+  const eliminator=bracketCard('3 vs 4 · eliminator',seeds[2],seeds[3]);
+  const secondFinalist=bracketCard('Second final place','Winner 3 vs 4','Loser 1 vs 2');
+  const final=bracketCard('FINAL','Winner 1 vs 2','Winner second final place',true);
+  $('#bracketGrid').innerHTML='<div class="bracket-col">'+firstFinalist+eliminator+'</div><div class="bracket-col semi">'+secondFinalist+'</div><div class="bracket-col final">'+final+'</div>';
+}
+function renderAll(){if(!isRotation())ensureSingleLeague();renderTournamentMeta();renderNext();renderStats();renderFixtures();renderStandings();renderBracket();renderRole();renderRules();renderRequests();}
+function openScore(id){
+  const match=isRotation()?rotationMatchDetails(id):data.matches.find(item=>item.id===id);if(!match)return;
+  editingMatchId=id;const sideA=isRotation()?rotationPair(match.a):team(match.a).name,sideB=isRotation()?rotationPair(match.b):team(match.b).name;
+  $('#scoreMatchTitle').textContent=sideA+' vs '+sideB;$('#scoreTeams').textContent=isRotation()?'Round '+match.round+' · '+match.group+' · Group game '+match.slot:(match.stage==='playoff'?(match.playoffLabel||'Playoff'):'Full round-robin league')+' · '+match.court+' · '+match.time;
+  $('#scoreFormatHint').textContent=match.status==='complete'?'Correct the one-game score, then save the update.':'Record one game to 21 points. The higher score wins the match.';
+  $('#scoreSideA').textContent=sideA;$('#scoreSideB').textContent=sideB;
+  const fields=$$('#scoreForm input[type=number]');fields.forEach((field,index)=>{field.value=match.games[0]?.[index]??'';field.setAttribute('aria-label',(index?'Second':'First')+' pair: '+(index?sideB:sideA)+' score');});
+  $('#scoreMessage').textContent='';$('#scoreDialog').showModal();
+}
+const legacyRenderPairInputs=renderPairInputs;
+renderPairInputs=function(format=$('#newFormat')?.value||'teams'){
+  legacyRenderPairInputs(format);
+  if(format==='rotation')return;
+  $('#newTournamentIntro').textContent='Add '+(playerCountForBuilder(format)/2)+' fixed pairs. Every pair will play every other pair once, then the top four enter the double-chance playoff.';
+  $('#formatBuilderHelp').textContent='Fixed doubles needs an even number of players. Every pair plays all other pairs once; there are no league groups.';
+  $$('.pair-number span').forEach(label=>{label.textContent='Full league';});
+}
