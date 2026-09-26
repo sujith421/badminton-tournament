@@ -174,10 +174,18 @@ initialiseCloud();
 // Fixed doubles uses one complete league: every pair meets every other pair once.
 function pairKey(a,b){return [a,b].sort().join('::');}
 function generatedMatches(teams){
-  const matches=[];
-  for(let firstIndex=0;firstIndex<teams.length;firstIndex++)for(let secondIndex=firstIndex+1;secondIndex<teams.length;secondIndex++){
-    const slot=Math.floor(matches.length/4),minutes=9*60+slot*75,time=String(Math.floor(minutes/60)).padStart(2,'0')+':'+String(minutes%60).padStart(2,'0');
-    matches.push({id:'league-'+pairKey(teams[firstIndex].id,teams[secondIndex].id),pool:'League',stage:'league',court:'Court '+((matches.length%4)+1),time,a:teams[firstIndex].id,b:teams[secondIndex].id,status:'upcoming',games:[]});
+  const matches=[],rotation=[...teams];
+  if(rotation.length%2)rotation.push(null);
+  const half=rotation.length/2;
+  for(let round=0;round<rotation.length-1;round++){
+    const minutes=9*60+round*75,time=String(Math.floor(minutes/60)).padStart(2,'0')+':'+String(minutes%60).padStart(2,'0');
+    for(let court=0;court<half;court++){
+      const first=rotation[court],second=rotation[rotation.length-1-court];
+      if(!first||!second)continue;
+      const swap=(round+court)%2===1,a=swap?second:first,b=swap?first:second;
+      matches.push({id:'league-'+pairKey(a.id,b.id),pool:'League',stage:'league',round:round+1,court:'Court '+(court+1),time,a:a.id,b:b.id,status:'upcoming',games:[]});
+    }
+    rotation.splice(1,0,rotation.pop());
   }
   return matches;
 }
@@ -252,7 +260,7 @@ function renderBracket(){
   const final=bracketCard('FINAL','Winner 1 vs 2','Winner second final place',true);
   $('#bracketGrid').innerHTML='<div class="bracket-col">'+firstFinalist+eliminator+'</div><div class="bracket-col semi">'+secondFinalist+'</div><div class="bracket-col final">'+final+'</div>';
 }
-function renderAll(){if(!isRotation())ensureSingleLeague();renderTournamentMeta();renderNext();renderStats();renderFixtures();renderStandings();renderBracket();renderRole();renderRules();renderRequests();}
+function renderAll(){if(!isRotation()){ensureSingleLeague();syncFixedPlayoffs();}renderTournamentMeta();renderNext();renderStats();renderFixtures();renderStandings();renderBracket();renderRole();renderRules();renderRequests();}
 function openScore(id){
   const match=isRotation()?rotationMatchDetails(id):data.matches.find(item=>item.id===id);if(!match)return;
   editingMatchId=id;const sideA=isRotation()?rotationPair(match.a):team(match.a).name,sideB=isRotation()?rotationPair(match.b):team(match.b).name;
@@ -270,3 +278,55 @@ renderPairInputs=function(format=$('#newFormat')?.value||'teams'){
   $('#formatBuilderHelp').textContent='Fixed doubles needs an even number of players. Every pair plays all other pairs once; there are no league groups.';
   $$('.pair-number span').forEach(label=>{label.textContent='Full league';});
 }
+
+function matchLoser(match){const winner=matchWinner(match);return winner===match?.a?match.b:winner===match?.b?match.a:null;}
+function playoffById(id){return data.matches.find(match=>match.id===id);}
+function upsertPlayoff(id,label,a,b,roundOffset,courtNumber){
+  if(!a||!b)return null;
+  const existing=playoffById(id);
+  if(existing){
+    if(existing.status!=='complete'&&(existing.a!==a||existing.b!==b)){existing.a=a;existing.b=b;existing.games=[];existing.status='upcoming';}
+    return existing;
+  }
+  const minutes=9*60+(data.teams.length-1)*75+roundOffset*75;
+  const created={id,stage:'playoff',playoffLabel:label,round:'Playoffs',court:label+' · Court '+courtNumber,time:String(Math.floor(minutes/60)).padStart(2,'0')+':'+String(minutes%60).padStart(2,'0'),a,b,status:'upcoming',games:[]};
+  data.matches.push(created);
+  return created;
+}
+function syncFixedPlayoffs(){
+  if(isRotation())return '';
+  const league=data.matches.filter(match=>match.stage!=='playoff');
+  if(data.teams.length<4||league.length===0||league.some(match=>match.status!=='complete'))return '';
+  const seeds=standings().slice(0,4).map(row=>row.team.id);
+  const before=data.matches.length;
+  const qualifierOne=upsertPlayoff('playoff-q1','Qualifier 1 · #1 vs #2',seeds[0],seeds[1],0,1);
+  const eliminator=upsertPlayoff('playoff-e','Eliminator · #3 vs #4',seeds[2],seeds[3],0,2);
+  if(qualifierOne?.status==='complete'&&eliminator?.status==='complete'){
+    const qualifierTwo=upsertPlayoff('playoff-q2','Qualifier 2 · winner #3/#4 vs loser #1/#2',matchWinner(eliminator),matchLoser(qualifierOne),1,1);
+    if(qualifierTwo?.status==='complete')upsertPlayoff('playoff-final','FINAL',matchWinner(qualifierOne),matchWinner(qualifierTwo),2,1);
+  }
+  return data.matches.length>before?'Playoff fixtures are ready.':'';
+}
+function playoffCard(label,match,fallbackA,fallbackB,final=false){
+  const winner=matchWinner(match),a=match?.a?team(match.a):fallbackA,b=match?.b?team(match.b):fallbackB,displayLabel=label+(match?.games?.length?' · '+scoreString(match):'');
+  return '<div class="bracket-match '+(final?'final-card':'')+'"><div class="bracket-row placeholder"><span>'+displayLabel+'</span><b>'+(final?'🏆':'—')+'</b></div>'+roundRow(a,winner===match?.a)+roundRow(b,winner===match?.b)+'</div>';
+}
+function renderBracket(){
+  if(isRotation()){renderRotationProgress();return;}
+  const seeds=overallTeamRankings().slice(0,4).map(row=>row.team),q1=playoffById('playoff-q1'),eliminator=playoffById('playoff-e'),q2=playoffById('playoff-q2'),final=playoffById('playoff-final');
+  $('.bracket-section .eyebrow').innerHTML='<span></span> Top-four playoff';$('.bracket-section h2').textContent='Double-chance path';$('.bracket-key').innerHTML='<span><i class="key-win"></i> #1/#2 winner goes straight to final</span><span><i></i> #3/#4 winner faces the #1/#2 loser</span>';
+  $('.round-labels').className='round-labels dynamic-bracket-labels';$('.round-labels').style.setProperty('--bracket-columns',3);$('.round-labels').innerHTML='<span>Qualifier & eliminator</span><span>Second final place</span><span>Final</span>';
+  $('#bracketGrid').className='bracket-grid dynamic-bracket-grid';$('#bracketGrid').style.setProperty('--bracket-columns',3);
+  if(seeds.length<4){$('#bracketGrid').innerHTML='<p class="rotation-ready">Add at least four pairs to unlock the top-four playoff.</p>';return;}
+  const left=playoffCard('Qualifier 1 · #1 vs #2',q1,seeds[0],seeds[1])+playoffCard('Eliminator · #3 vs #4',eliminator,seeds[2],seeds[3]);
+  const middle=playoffCard('Qualifier 2',q2,'Winner #3 vs #4','Loser #1 vs #2');
+  const right=playoffCard('FINAL',final,'Winner #1 vs #2','Winner qualifier 2',true);
+  $('#bracketGrid').innerHTML='<div class="bracket-col">'+left+'</div><div class="bracket-col semi">'+middle+'</div><div class="bracket-col final">'+right+'</div>';
+}
+$('#scoreForm').addEventListener('submit',()=>{
+  if(isRotation())return;
+  const match=data.matches.find(item=>item.id===editingMatchId),scores=$$('#scoreForm input[type=number]').map(field=>field.value===''?null:Number(field.value));
+  if(!match||scores[0]===null||scores[1]===null||scores[0]===scores[1])return;
+  const update=syncFixedPlayoffs();
+  if(update){save();renderAll();toast(update);}
+});
