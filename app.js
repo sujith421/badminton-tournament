@@ -308,7 +308,7 @@ function syncFixedPlayoffs(){
   return data.matches.length>before?'Playoff fixtures are ready.':'';
 }
 function playoffCard(label,match,fallbackA,fallbackB,final=false){
-  const winner=matchWinner(match),a=match?.a?team(match.a):fallbackA,b=match?.b?team(match.b):fallbackB,displayLabel=label+(match?.games?.length?' · '+scoreString(match):'');
+  const winner=matchWinner(match||{}),a=match?.a?team(match.a):fallbackA,b=match?.b?team(match.b):fallbackB,displayLabel=label+(match?.games?.length?' · '+scoreString(match):'');
   return '<div class="bracket-match '+(final?'final-card':'')+'"><div class="bracket-row placeholder"><span>'+displayLabel+'</span><b>'+(final?'🏆':'—')+'</b></div>'+roundRow(a,winner===match?.a)+roundRow(b,winner===match?.b)+'</div>';
 }
 function renderBracket(){
