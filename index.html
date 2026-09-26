@@ -46,6 +46,14 @@
             <button class="button button-coral" data-scroll="fixtures">View today's matches <span>↓</span></button>
             <div class="venue"><strong id="eventVenue">Rally Club Courts</strong><span>4 Willow Lane · Court 1–4</span></div>
           </div>
+          <aside id="podiumPanel" class="podium-panel" hidden aria-live="polite">
+            <p class="podium-kicker">Tournament complete</p>
+            <div class="podium-results">
+              <div><span>🏆 Winner</span><strong id="winnerName"></strong></div>
+              <div><span>Runner-up</span><strong id="runnerName"></strong></div>
+            </div>
+            <small id="podiumScore"></small>
+          </aside>
         </div>
         <div class="hero-art" aria-label="Badminton shuttlecock illustration">
           <div class="sun"></div>
@@ -183,7 +191,7 @@
     <div id="toast" class="toast" role="status"></div>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-config.js?v=20260919-live-sync"></script>
-    <script src="app.js?v=20260926-playoff-fix"></script>
+    <script src="app.js?v=20260926-podium"></script>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(() => {}));
