@@ -16,7 +16,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="styles.css?v=20260926-player-registration" />
+    <link rel="stylesheet" href="styles.css?v=20260926-fixed-team-registration" />
   </head>
   <body>
     <div class="page-noise"></div>
@@ -170,7 +170,7 @@
         <p class="eyebrow"><span></span> Tournament builder</p>
         <h2>New doubles<br /><em>tournament.</em></h2>
         <p id="newTournamentIntro" class="dialog-copy">Choose your player count, then add names. The fixture list and knockout draw are generated automatically.</p>
-        <div class="event-fields"><label>Tournament name<input id="newEventName" type="text" maxlength="42" placeholder="e.g. Sunday Smash" required /></label><label>Date<input id="newEventDate" type="date" required /></label><label class="event-venue-label">Venue<input id="newEventVenue" type="text" maxlength="50" placeholder="e.g. Riverside Sports Hall" required /></label><label class="format-label">Format<select id="newFormat"><option value="teams">Fixed doubles · full round robin + top 4 playoff</option><option value="rotation">Rotation League · individual leaderboard</option></select></label><label class="player-count-field">Number of players<input id="newPlayerCount" type="number" min="4" step="2" value="16" inputmode="numeric" required /><small id="playerCountHint">Fixed doubles needs an even number of players.</small></label></div>
+        <div class="event-fields"><label>Tournament name<input id="newEventName" type="text" maxlength="42" placeholder="e.g. Sunday Smash" required /></label><label>Date<input id="newEventDate" type="date" required /></label><label class="event-venue-label">Venue<input id="newEventVenue" type="text" maxlength="50" placeholder="e.g. Riverside Sports Hall" required /></label><label class="format-label">Format<select id="newFormat"><option value="teams">Fixed doubles · full round robin + top 4 playoff</option><option value="rotation">Rotation League · individual leaderboard</option></select></label><label class="player-count-field">Number of players<input id="newPlayerCount" type="number" min="4" max="20" step="2" value="16" inputmode="numeric" required /><small id="playerCountHint">Fixed doubles needs an even number of players (maximum 10 teams).</small></label></div>
         <p id="formatBuilderHelp" class="builder-help">Enter an even number of players. The app creates fixed pairs, balanced round-robin pools, and the suitable knockout stage.</p>
         <div class="registered-player-loader"><div><strong>Registered player list</strong><span id="registeredPlayerCount">0 players</span></div><p id="registrationBuilderNote">Share the player sign-up link from Tournament setup to collect names and skill levels.</p><button id="loadRegistrationsButton" class="small-button" type="button">Load registered players</button></div>
         <div class="pair-builder-heading"><strong id="playerBuilderTitle">Your doubles pairs</strong><span id="playerCountLabel">16 players</span></div>
@@ -184,11 +184,12 @@
       <form method="dialog" id="registrationForm">
         <button class="dialog-close" value="cancel" aria-label="Close">×</button>
         <p class="eyebrow"><span></span> Player sign-up</p>
-        <h2>Join the<br /><em>tournament.</em></h2>
+        <h2 id="registrationTitle">Join the<br /><em>tournament.</em></h2>
         <p id="registrationTournament" class="dialog-copy">Add your name and experience level to the player list.</p>
-        <label>Your name<input id="registrationName" type="text" maxlength="30" autocomplete="name" placeholder="Your name" required /></label>
-        <label>Experience level<select id="registrationExperience"><option value="beginner">Beginner</option><option value="intermediate" selected>Intermediate</option><option value="advanced">Advanced</option><option value="competitive">Competitive</option></select></label>
-        <button class="button button-coral full" type="submit">Add me to the list <span>→</span></button>
+        <label id="registrationFirstPlayerLabel">Your name<input id="registrationName" type="text" maxlength="30" autocomplete="name" placeholder="Your name" required /></label>
+        <label id="registrationSecondPlayerLabel" hidden>Second player<input id="registrationPartnerName" type="text" maxlength="30" autocomplete="name" placeholder="Partner name" /></label>
+        <label id="registrationExperienceLabel">Experience level<select id="registrationExperience"><option value="beginner">Beginner</option><option value="intermediate" selected>Intermediate</option><option value="advanced">Advanced</option><option value="competitive">Competitive</option></select></label>
+        <button id="registrationSubmitButton" class="button button-coral full" type="submit">Add me to the list <span>→</span></button>
         <p id="registrationMessage" class="form-message"></p>
       </form>
     </dialog>
@@ -208,7 +209,7 @@
     <div id="toast" class="toast" role="status"></div>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-config.js?v=20260919-live-sync"></script>
-    <script src="app.js?v=20260926-player-registration"></script>
+    <script src="app.js?v=20260926-fixed-team-registration"></script>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(() => {}));
