@@ -330,3 +330,23 @@ $('#scoreForm').addEventListener('submit',()=>{
   const update=syncFixedPlayoffs();
   if(update){save();renderAll();toast(update);}
 });
+
+function tournamentPodium(){
+  if(isRotation()){
+    const matches=rotationMatches();
+    if(data.rotation?.rounds.length<3||matches.length===0||matches.some(match=>match.status!=='complete'))return null;
+    const standings=rotationOverallScores();
+    return standings.length>1?{winner:standings[0].player.name,runner:standings[1].player.name,detail:'Final total +/-: '+signedScore(standings[0].score)+' to '+signedScore(standings[1].score)}:null;
+  }
+  const final=playoffById('playoff-final');
+  if(final?.status!=='complete')return null;
+  const winner=matchWinner(final),runner=matchLoser(final);
+  return winner&&runner?{winner:team(winner).name,runner:team(runner).name,detail:'Final score: '+scoreString(final)}:null;
+}
+function renderPodium(){
+  const podium=tournamentPodium(),panel=$('#podiumPanel');
+  panel.hidden=!podium;
+  if(!podium)return;
+  $('#winnerName').textContent=podium.winner;$('#runnerName').textContent=podium.runner;$('#podiumScore').textContent=podium.detail;
+}
+function renderAll(){if(!isRotation()){ensureSingleLeague();syncFixedPlayoffs();}renderTournamentMeta();renderNext();renderStats();renderFixtures();renderStandings();renderBracket();renderRole();renderRules();renderRequests();renderPodium();}
