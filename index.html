@@ -89,8 +89,8 @@
           </article>
           <article class="how-card">
             <p class="eyebrow"><span></span> How it works</p>
-            <h3 id="formatGuideTitle">Pool play to<br />the podium.</h3>
-            <ol id="formatGuideSteps" class="format-steps"><li><b>01</b><span>Every pair plays three pool games.</span></li><li><b>02</b><span>Top four from each pool enter quarters.</span></li><li><b>03</b><span>Win three knockout rounds to lift it.</span></li></ol>
+            <h3 id="formatGuideTitle">One league to<br />the playoff.</h3>
+            <ol id="formatGuideSteps" class="format-steps"><li><b>01</b><span>Every pair plays every other pair once.</span></li><li><b>02</b><span>The top four advance to the playoff.</span></li><li><b>03</b><span>The #1/#2 winner goes straight to the final.</span></li></ol>
             <button class="text-button" data-view-target="bracket">See the knockout path <span>→</span></button>
           </article>
         </div>
@@ -103,7 +103,7 @@
         </div>
         <div class="fixtures-layout">
           <div class="fixture-list-wrap">
-            <div class="list-title"><span id="fixturesTitle">Pool fixtures</span><small id="fixtureFormatNote">1 game · 21 points</small></div>
+            <div class="list-title"><span id="fixturesTitle">League fixtures</span><small id="fixtureFormatNote">1 game · 21 points</small></div>
             <div id="fixturesList" class="fixtures-list"></div>
           </div>
           <aside class="standings-panel">
@@ -134,7 +134,7 @@
         <div><p class="eyebrow"><span></span> Friendly rules</p><h2>Come ready<br />to rally.</h2></div>
         <div class="rules-list">
           <article><b>01</b><div><h3>Bring two shuttles</h3><p>Every player brings 2 birds/shuttles to contribute to the day.</p></div></article>
-          <article><b>02</b><div><h3 id="formatRuleTitle">Play your pool</h3><p id="formatRuleText">Fixed doubles pairs play a round robin in their pool before the knockout rounds begin.</p></div></article>
+          <article><b>02</b><div><h3 id="formatRuleTitle">One full league</h3><p id="formatRuleText">Every fixed doubles pair plays every other pair once before the top-four playoff.</p></div></article>
           <article><b>03</b><div><h3>Share the spoils</h3><p>The top 3 winners split all remaining birds equally.</p></div></article>
           <article><b>04</b><div><h3>Volunteer court rotation</h3><p>We need four courts only. Volunteers rotate booking and helping to run them; please keep all tournament players on these four courts so they stay dedicated to the tournament.</p></div></article>
         </div>
@@ -159,7 +159,7 @@
         <p class="eyebrow"><span></span> Tournament builder</p>
         <h2>New doubles<br /><em>tournament.</em></h2>
         <p id="newTournamentIntro" class="dialog-copy">Choose your player count, then add names. The fixture list and knockout draw are generated automatically.</p>
-        <div class="event-fields"><label>Tournament name<input id="newEventName" type="text" maxlength="42" placeholder="e.g. Sunday Smash" required /></label><label>Date<input id="newEventDate" type="date" required /></label><label class="event-venue-label">Venue<input id="newEventVenue" type="text" maxlength="50" placeholder="e.g. Riverside Sports Hall" required /></label><label class="format-label">Format<select id="newFormat"><option value="teams">Fixed doubles · league to knockout</option><option value="rotation">Rotation League · individual leaderboard</option></select></label><label class="player-count-field">Number of players<input id="newPlayerCount" type="number" min="4" step="2" value="16" inputmode="numeric" required /><small id="playerCountHint">Fixed doubles needs an even number of players.</small></label></div>
+        <div class="event-fields"><label>Tournament name<input id="newEventName" type="text" maxlength="42" placeholder="e.g. Sunday Smash" required /></label><label>Date<input id="newEventDate" type="date" required /></label><label class="event-venue-label">Venue<input id="newEventVenue" type="text" maxlength="50" placeholder="e.g. Riverside Sports Hall" required /></label><label class="format-label">Format<select id="newFormat"><option value="teams">Fixed doubles · full round robin + top 4 playoff</option><option value="rotation">Rotation League · individual leaderboard</option></select></label><label class="player-count-field">Number of players<input id="newPlayerCount" type="number" min="4" step="2" value="16" inputmode="numeric" required /><small id="playerCountHint">Fixed doubles needs an even number of players.</small></label></div>
         <p id="formatBuilderHelp" class="builder-help">Enter an even number of players. The app creates fixed pairs, balanced round-robin pools, and the suitable knockout stage.</p>
         <div class="pair-builder-heading"><strong id="playerBuilderTitle">Your doubles pairs</strong><span id="playerCountLabel">16 players</span></div>
         <div id="playerPairs" class="player-pairs"></div>
@@ -183,7 +183,7 @@
     <div id="toast" class="toast" role="status"></div>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-config.js?v=20260919-live-sync"></script>
-    <script src="app.js?v=20260926-score-sync"></script>
+    <script src="app.js?v=20260926-full-league"></script>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(() => {}));
