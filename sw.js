@@ -1,10 +1,10 @@
-const CACHE_NAME = 'rally-club-mobile-v8';
+const CACHE_NAME = 'rally-club-mobile-v9';
 const APP_SHELL = [
   './',
   './index.html',
   './styles.css?v=20260919-live-sync',
   './supabase-config.js?v=20260919-live-sync',
-  './app.js?v=20260926-podium',
+  './app.js?v=20260926-team-fixtures',
   './manifest.webmanifest',
   './icon.svg'
 ];
