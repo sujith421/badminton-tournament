@@ -24,7 +24,7 @@ const DEFAULT_DATA = {
     { id: 'm12', pool: 'B', court: 'Court 4', time: '11:30', a: 't6', b: 't7', status: 'upcoming', games: [] }
   ],
   tournament: { name: 'Friendly doubles,', date: 'Saturday, 21 September · 09:00', venue: 'Rally Club Courts', format: 'teams' },
-  players: [], rotation: null, requests: [], approved: [], role: 'visitor', scorerName: ''
+  players: [], rotation: null, registrations: [], requests: [], approved: [], role: 'visitor', scorerName: ''
 };
 const CLOUD_CONFIG=window.RALLY_SUPABASE||null;
 const cloud={client:null,tournamentId:null,ownerId:null,session:null,editorApproved:false,channel:null,saveTimer:null,ready:false,authListening:false,updatedAt:null,pollTimer:null,refreshInFlight:false,refreshListeners:false};
@@ -40,7 +40,7 @@ function initials(name){ return name.split(' ').map(p => p[0]).join('').slice(0,
 function isRotation(){ return data.tournament.format==='rotation'; }
 function shareUrl(){ if(!cloud.tournamentId)return ''; const url=new URL(window.location.href); url.search='';url.hash='';url.searchParams.set('tournament',cloud.tournamentId);return url.toString(); }
 function setCloudStatus(message){ const status=$('#cloudStatus');if(status)status.textContent=message; }
-function updateSharingUi(){ const publish=$('#publishTournamentButton'),copy=$('#copyTournamentLinkButton');if(!publish||!copy)return;publish.disabled=false;publish.textContent=cloud.tournamentId?'Save live tournament':'Publish live tournament';copy.disabled=!cloud.tournamentId;setCloudStatus(cloud.tournamentId?'This tournament is live. Everyone with the link can update it, and changes appear straight away.':'Publish this tournament once to create a shared live event.'); }
+function updateSharingUi(){ const publish=$('#publishTournamentButton'),copy=$('#copyTournamentLinkButton'),registrationCopy=$('#copyRegistrationLinkButton');if(!publish||!copy)return;publish.disabled=false;publish.textContent=cloud.tournamentId?'Save live tournament':'Publish live tournament';copy.disabled=!cloud.tournamentId;if(registrationCopy)registrationCopy.disabled=!cloud.tournamentId;setCloudStatus(cloud.tournamentId?'This tournament is live. Everyone with the link can update it, and changes appear straight away.':'Publish this tournament once to create a shared live event.'); }
 function applyCloudRole(){ data.role='admin';cloud.editorApproved=true; }
 function hydrateCloudTournament(row){ if(!row?.state)return;if(cloud.updatedAt&&row.updated_at&&row.updated_at<cloud.updatedAt)return;data={...structuredClone(DEFAULT_DATA),...row.state,tournament:{...DEFAULT_DATA.tournament,...row.state.tournament},requests:[],approved:[],role:'admin',scorerName:''};cloud.tournamentId=row.id;cloud.ownerId=row.owner_id;cloud.updatedAt=row.updated_at||cloud.updatedAt;applyCloudRole();renderTeamsSelect();renderAll();updateSharingUi(); }
 async function saveCloudState(){ if(!cloud.client||!cloud.tournamentId)return;const {data:row,error}=await cloud.client.from('tournaments').update({name:data.tournament.name,state:cloudState()}).eq('id',cloud.tournamentId).select('id,updated_at').single();if(error){console.warn('Live save failed',error.message);toast('Could not share that change. Please try again.');return;}cloud.updatedAt=row?.updated_at||cloud.updatedAt; }
@@ -152,12 +152,12 @@ $('#newTournamentForm').addEventListener('submit',async e=>{
     if(!Number.isInteger(playerCount)||playerCount<4){$('#newTournamentMessage').textContent='Rotation League supports every whole-number player count from 4 upward.';return;}
     const names=$$('[data-rotation-player]').map(input=>input.value.trim()), levels=$$('[data-rotation-level]').map(input=>input.value); if(names.length!==playerCount||names.some(value=>!value)){ $('#newTournamentMessage').textContent=`Please enter all ${playerCount} player names.`;return; } if(levels.length!==playerCount||levels.some(level=>!EXPERIENCE_SCORE[level])){$('#newTournamentMessage').textContent='Choose an experience level for every player.';return;} if(new Set(names.map(value=>value.toLowerCase())).size!==names.length){$('#newTournamentMessage').textContent='Each player name must be unique.';return;}
     if(!confirm(`Create “${name}”? This will replace the current tournament, results, and scorekeeper approvals.`)) return;
-    const rotationPlayers=names.map((person,index)=>({id:`p${index+1}`,name:person,experience:levels[index]})), groupSizes=rotationGroupSizes(playerCount), equalGroups=balancedRotationGroups(rotationPlayers,groupSizes); data={tournament:{name,venue,date:displayDate(date),format:'rotation'},teams:[],matches:[],players:rotationPlayers,rotation:{groupSizes,rounds:[buildRotationRound(1,equalGroups)]},requests:[],approved:[],role,scorerName:''};
+    const rotationPlayers=names.map((person,index)=>({id:`p${index+1}`,name:person,experience:levels[index]})), groupSizes=rotationGroupSizes(playerCount), equalGroups=balancedRotationGroups(rotationPlayers,groupSizes); data={tournament:{name,venue,date:displayDate(date),format:'rotation'},teams:[],matches:[],players:rotationPlayers,rotation:{groupSizes,rounds:[buildRotationRound(1,equalGroups)]},registrations:[],requests:[],approved:[],role,scorerName:''};
   } else {
     if(!Number.isInteger(playerCount)||playerCount<4||playerCount%2!==0){$('#newTournamentMessage').textContent='Fixed doubles needs an even number of at least 4 players.';return;}
     const pairInputs=$$('#playerPairs input'),pairs=[]; for(let i=0;i<pairInputs.length;i+=2){const first=pairInputs[i].value.trim(),second=pairInputs[i+1].value.trim();if(!first||!second){$('#newTournamentMessage').textContent='Please enter both players for every pair.';return;}pairs.push([first,second]);} const allNames=pairs.flat(); if(pairs.length!==playerCount/2){$('#newTournamentMessage').textContent='Player entries do not match the selected count.';return;} if(new Set(allNames.map(value=>value.toLowerCase())).size!==allNames.length){$('#newTournamentMessage').textContent='Each player name must be unique.';return;}
     if(!confirm(`Create “${name}”? This will replace the current tournament, results, and scorekeeper approvals.`)) return;
-    const groupCount=fixedPoolCount(pairs.length), teams=pairs.map(([first,second],index)=>({id:`t${index+1}`,name:`${first} & ${second}`,short:`${playerInitials(first)}${playerInitials(second)}`.slice(0,4),players:`${first} · ${second}`,pool:poolLabel(index%groupCount)})); data={tournament:{name,venue,date:displayDate(date),format:'teams'},teams,matches:generatedMatches(teams),players:[],rotation:null,requests:[],approved:[],role,scorerName:''};
+    const groupCount=fixedPoolCount(pairs.length), teams=pairs.map(([first,second],index)=>({id:`t${index+1}`,name:`${first} & ${second}`,short:`${playerInitials(first)}${playerInitials(second)}`.slice(0,4),players:`${first} · ${second}`,pool:poolLabel(index%groupCount)})); data={tournament:{name,venue,date:displayDate(date),format:'teams'},teams,matches:generatedMatches(teams),players:[],rotation:null,registrations:[],requests:[],approved:[],role,scorerName:''};
   }
   activePool='A';activeFilter='all';let saved=true;if(cloud.client)saved=await publishTournament(Boolean(cloud.tournamentId));else save();if(!saved){data=previousData;renderTeamsSelect();renderAll();$('#newTournamentMessage').textContent='The new tournament could not be published. Your previous tournament is still open.';return;}$('#newTournamentDialog').close();renderTeamsSelect();renderAll();window.scrollTo({top:0,behavior:'smooth'});toast(`${name} is ready to play.`);
 });
@@ -349,7 +349,7 @@ function renderPodium(){
   if(!podium)return;
   $('#winnerName').textContent=podium.winner;$('#runnerName').textContent=podium.runner;$('#podiumScore').textContent=podium.detail;
 }
-function renderAll(){if(!isRotation()){ensureSingleLeague();syncFixedPlayoffs();}renderTournamentMeta();renderNext();renderStats();renderFixtures();renderStandings();renderBracket();renderRole();renderRules();renderRequests();renderPodium();}
+function renderAll(){if(!isRotation()){ensureSingleLeague();syncFixedPlayoffs();}renderTournamentMeta();renderNext();renderStats();renderFixtures();renderStandings();renderBracket();renderRole();renderRules();renderRequests();renderPodium();renderRegistrationControls();}
 var selectedFixtureTeamId='';
 function renderTeamFixturePicker(){
   const button=$('.filter-tab[data-filter="team"]'),control=$('#teamFixtureControl'),select=$('#teamFixtureSelect');
@@ -391,3 +391,81 @@ function renderFixtures(){
     card.append(meta,teams,action);list.append(card);
   });
 }
+
+// Player registration is stored in the same live tournament state, so the organiser
+// can collect names before creating a draw without maintaining a separate list.
+var registrationAutoOpened=false;
+function registeredPlayers(){return Array.isArray(data.registrations)?data.registrations:[];}
+function registrationMode(){return new URLSearchParams(window.location.search).get('register')==='1';}
+function registrationUrl(){const shared=shareUrl();if(!shared)return '';const url=new URL(shared);url.searchParams.set('register','1');return url.toString();}
+function registrationCountLabel(count){return count+' '+(count===1?'player':'players');}
+function updateRegistrationBuilderNote(){
+  const entries=registeredPlayers(),note=$('#registrationBuilderNote'),count=$('#registeredPlayerCount'),loader=$('#loadRegistrationsButton');
+  if(!note||!count||!loader)return;
+  count.textContent=registrationCountLabel(entries.length);
+  loader.disabled=entries.length===0;
+  if(!entries.length){note.textContent='Share the player sign-up link from Tournament setup to collect names and skill levels.';return;}
+  const format=$('#newFormat')?.value||'teams';
+  if(entries.length<4){note.textContent=registrationCountLabel(entries.length)+' registered. Add at least '+(4-entries.length)+' more before creating a tournament.';return;}
+  if(format==='rotation'){note.textContent=registrationCountLabel(entries.length)+' ready. Loading them keeps their selected experience levels.';return;}
+  note.textContent=registrationCountLabel(entries.length)+' ready. Fixed doubles pairs are filled in sign-up order; you can edit the pairings before creating the tournament.'+(entries.length%2?' Add one more player to complete the final pair.':'');
+}
+function renderRegistrationControls(){
+  const entries=registeredPlayers(),summary=$('#registrationSummary'),copy=$('#copyRegistrationLinkButton');
+  if(summary){
+    if(!entries.length)summary.textContent='No players have registered yet.';
+    else{const names=entries.slice(0,6).map(person=>person.name).join(' · '),extra=entries.length>6?' +' +(entries.length-6)+' more':'';summary.textContent=registrationCountLabel(entries.length)+' registered: '+names+extra+'.';}
+  }
+  if(copy)copy.disabled=!cloud.tournamentId;
+  updateRegistrationBuilderNote();
+  if(registrationMode()&&cloud.ready&&cloud.tournamentId&&!registrationAutoOpened){registrationAutoOpened=true;openRegistrationDialog();}
+}
+function openRegistrationDialog(){
+  const dialog=$('#registrationDialog');if(!dialog||dialog.open)return;
+  $('#registrationTournament').textContent='Add your name and experience level for '+data.tournament.name+'. The organiser will load this list into the tournament creator.';
+  $('#registrationMessage').textContent='';
+  dialog.showModal();
+}
+function loadRegisteredPlayersIntoBuilder(announce=false){
+  const entries=registeredPlayers(),format=$('#newFormat').value;
+  if(!entries.length){if(announce)$('#newTournamentMessage').textContent='There are no registered players to load yet.';updateRegistrationBuilderNote();return false;}
+  const playerCount=Math.max(4,format==='teams'&&entries.length%2?entries.length+1:entries.length);
+  $('#newPlayerCount').value=playerCount;
+  renderPairInputs(format);
+  if(format==='rotation'){
+    $$('[data-rotation-player]').forEach((input,index)=>{const entry=entries[index];if(!entry)return;input.value=entry.name;const level=$('[data-rotation-level="'+index+'"]');if(level)level.value=EXPERIENCE_SCORE[entry.experience]?entry.experience:'intermediate';});
+  }else{
+    $$('[data-player]').forEach((input,index)=>{if(entries[index])input.value=entries[index].name;});
+  }
+  updateRegistrationBuilderNote();
+  if(announce)$('#newTournamentMessage').textContent=registrationCountLabel(entries.length)+' loaded from the sign-up list.';
+  return true;
+}
+function openNewTournament(){
+  $('#newFormat').value='teams';
+  $('#newPlayerCount').value='16';
+  renderPairInputs('teams');
+  $('#newEventName').value='';$('#newEventVenue').value='';$('#newEventDate').value=new Date().toISOString().slice(0,10);$('#newTournamentMessage').textContent='';
+  updateRegistrationBuilderNote();
+  if(registeredPlayers().length)loadRegisteredPlayersIntoBuilder();
+  $('#dashboardDialog').close();$('#newTournamentDialog').showModal();
+}
+$('#copyRegistrationLinkButton').onclick=async()=>{
+  const link=registrationUrl();if(!link){toast('Publish the tournament first to create a player sign-up link.');return;}
+  try{await navigator.clipboard.writeText(link);toast('Player sign-up link copied.');}catch{toast('Copy the player sign-up link from your browser address bar.');}
+};
+$('#loadRegistrationsButton').onclick=()=>loadRegisteredPlayersIntoBuilder(true);
+$('#newFormat').addEventListener('change',updateRegistrationBuilderNote);
+$('#newPlayerCount').addEventListener('input',updateRegistrationBuilderNote);
+$('#registrationForm').addEventListener('submit',event=>{
+  event.preventDefault();
+  const name=$('#registrationName').value.trim(),experience=$('#registrationExperience').value,message=$('#registrationMessage');
+  if(!name){message.textContent='Please enter your name.';return;}
+  if(!EXPERIENCE_SCORE[experience]){message.textContent='Please select your experience level.';return;}
+  if(!cloud.tournamentId){message.textContent='This player sign-up link is not connected to a live tournament yet.';return;}
+  data.registrations=registeredPlayers();
+  const existing=data.registrations.find(person=>person.name.toLocaleLowerCase()===name.toLocaleLowerCase());
+  if(existing){existing.name=name;existing.experience=experience;message.textContent='Your registration has been updated.';}
+  else{data.registrations.push({id:(crypto.randomUUID?crypto.randomUUID():'registration-'+Date.now()+'-'+Math.random().toString(36).slice(2)),name,experience,createdAt:new Date().toISOString()});message.textContent='You are on the player list.';}
+  save();renderRegistrationControls();$('#registrationName').value='';
+});
