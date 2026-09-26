@@ -124,9 +124,9 @@ function playerInitials(name){ return name.trim().split(/\s+/).map(word=>word[0]
 function displayDate(value){ const date=new Date(`${value}T12:00:00`); return Number.isNaN(date.valueOf())?'Tournament day':`${date.toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'long'})} · 09:00`; }
 function fixedPoolCount(teamCount){ return teamCount<=4?1:Math.ceil(teamCount/4); }
 function generatedMatches(teams){ const matches=[]; const pools=[...new Set(teams.map(t=>t.pool))]; pools.forEach(pool=>{ const members=teams.filter(t=>t.pool===pool); for(let first=0;first<members.length;first++)for(let second=first+1;second<members.length;second++){ const slot=Math.floor(matches.length/4), minutes=9*60+slot*75, time=`${String(Math.floor(minutes/60)).padStart(2,'0')}:${String(minutes%60).padStart(2,'0')}`; matches.push({id:`m${matches.length+1}`,pool,court:`Court ${(matches.length%4)+1}`,time,a:members[first].id,b:members[second].id,status:'upcoming',games:[]}); }}); return matches; }
-function playerCountForBuilder(format){ const requested=Number($('#newPlayerCount')?.value), step=format==='rotation'?1:2; if(!Number.isInteger(requested)||requested<4)return 4; return requested-((requested-4)%step); }
+function playerCountForBuilder(format){ const requested=Number($('#newPlayerCount')?.value), step=format==='rotation'?1:2, maximum=format==='rotation'?Infinity:20; if(!Number.isInteger(requested)||requested<4)return 4; return Math.min(maximum,requested-((requested-4)%step)); }
 function renderPairInputs(format=$('#newFormat')?.value||'teams'){
-  const rotation=format==='rotation', countInput=$('#newPlayerCount'), playerCount=playerCountForBuilder(format), pairCount=playerCount/2, rotationGroups=rotation?rotationGroupSizes(playerCount):[], groupCount=rotation?rotationGroups.length:fixedPoolCount(pairCount); countInput.min='4'; countInput.removeAttribute('max'); countInput.step=rotation?'1':'2'; $('#playerCountHint').textContent=rotation?'Rotation League accepts every whole-number player count from 4 upward.':'Fixed doubles needs an even number of players.'; $('#playerBuilderTitle').textContent=rotation?'Your rotation players':'Your fixed doubles pairs'; $('#playerCountLabel').textContent=`${playerCount} players`; $('#newTournamentIntro').textContent=rotation?`Add ${playerCount} individual players. Their experience levels are balanced across ${groupCount} groups of ${rotationGroups.join(' / ')} for three scoring rounds.`:`Add ${pairCount} fixed pairs (${playerCount} players). The app balances them across ${groupCount} league ${groupCount===1?'group':'groups'}, creates round-robin fixtures, and seeds the suitable knockout draw.`; $('#formatBuilderHelp').textContent=rotation?`Enter any whole number of players from 4 upward. The scheduler builds balanced groups of at least four (for example, 14 players become 4 / 5 / 5) and generates fair doubles rotations.`:`Fixed doubles needs an even number of players. Enter both players for each pair; groups stay as even as possible.`;
+  const rotation=format==='rotation', countInput=$('#newPlayerCount'), playerCount=playerCountForBuilder(format), pairCount=playerCount/2, rotationGroups=rotation?rotationGroupSizes(playerCount):[], groupCount=rotation?rotationGroups.length:fixedPoolCount(pairCount); countInput.min='4';if(rotation)countInput.removeAttribute('max');else countInput.max='20';countInput.step=rotation?'1':'2'; $('#playerCountHint').textContent=rotation?'Rotation League accepts every whole-number player count from 4 upward.':'Fixed doubles needs an even number of players, up to 10 teams.'; $('#playerBuilderTitle').textContent=rotation?'Your rotation players':'Your fixed doubles pairs'; $('#playerCountLabel').textContent=`${playerCount} players`; $('#newTournamentIntro').textContent=rotation?`Add ${playerCount} individual players. Their experience levels are balanced across ${groupCount} groups of ${rotationGroups.join(' / ')} for three scoring rounds.`:`Add ${pairCount} fixed pairs (${playerCount} players). The app balances them across ${groupCount} league ${groupCount===1?'group':'groups'}, creates round-robin fixtures, and seeds the suitable knockout draw.`; $('#formatBuilderHelp').textContent=rotation?`Enter any whole number of players from 4 upward. The scheduler builds balanced groups of at least four (for example, 14 players become 4 / 5 / 5) and generates fair doubles rotations.`:`Fixed doubles supports 2–10 teams. Enter both players for each pair; every pair plays every other pair once.`;
   $('#playerPairs').classList.toggle('rotation-player-grid',rotation); $('#playerPairs').innerHTML=rotation?Array.from({length:playerCount},(_,index)=>`<label class="rotation-player-input"><span>PLAYER ${String(index+1).padStart(2,'0')}</span><input data-rotation-player="${index}" type="text" maxlength="30" autocomplete="name" placeholder="Player name" required /><select data-rotation-level="${index}" aria-label="Experience level for player ${index+1}"><option value="beginner">Beginner</option><option value="intermediate" selected>Intermediate</option><option value="advanced">Advanced</option><option value="competitive">Competitive</option></select></label>`).join(''):Array.from({length:pairCount},(_,index)=>`<div class="pair-input-row"><div class="pair-number"><b>${String(index+1).padStart(2,'0')}</b><span>Group ${poolLabel(index%groupCount)}</span></div><label>Player 1<input data-player="${index}-a" type="text" maxlength="30" autocomplete="name" placeholder="First player" required /></label><label>Player 2<input data-player="${index}-b" type="text" maxlength="30" autocomplete="name" placeholder="Second player" required /></label></div>`).join('');
 }
 function openNewTournament(){
@@ -154,7 +154,7 @@ $('#newTournamentForm').addEventListener('submit',async e=>{
     if(!confirm(`Create “${name}”? This will replace the current tournament, results, and scorekeeper approvals.`)) return;
     const rotationPlayers=names.map((person,index)=>({id:`p${index+1}`,name:person,experience:levels[index]})), groupSizes=rotationGroupSizes(playerCount), equalGroups=balancedRotationGroups(rotationPlayers,groupSizes); data={tournament:{name,venue,date:displayDate(date),format:'rotation'},teams:[],matches:[],players:rotationPlayers,rotation:{groupSizes,rounds:[buildRotationRound(1,equalGroups)]},registrations:[],requests:[],approved:[],role,scorerName:''};
   } else {
-    if(!Number.isInteger(playerCount)||playerCount<4||playerCount%2!==0){$('#newTournamentMessage').textContent='Fixed doubles needs an even number of at least 4 players.';return;}
+    if(!Number.isInteger(playerCount)||playerCount<4||playerCount>20||playerCount%2!==0){$('#newTournamentMessage').textContent='Fixed doubles needs an even number of 4–20 players (maximum 10 teams).';return;}
     const pairInputs=$$('#playerPairs input'),pairs=[]; for(let i=0;i<pairInputs.length;i+=2){const first=pairInputs[i].value.trim(),second=pairInputs[i+1].value.trim();if(!first||!second){$('#newTournamentMessage').textContent='Please enter both players for every pair.';return;}pairs.push([first,second]);} const allNames=pairs.flat(); if(pairs.length!==playerCount/2){$('#newTournamentMessage').textContent='Player entries do not match the selected count.';return;} if(new Set(allNames.map(value=>value.toLowerCase())).size!==allNames.length){$('#newTournamentMessage').textContent='Each player name must be unique.';return;}
     if(!confirm(`Create “${name}”? This will replace the current tournament, results, and scorekeeper approvals.`)) return;
     const groupCount=fixedPoolCount(pairs.length), teams=pairs.map(([first,second],index)=>({id:`t${index+1}`,name:`${first} & ${second}`,short:`${playerInitials(first)}${playerInitials(second)}`.slice(0,4),players:`${first} · ${second}`,pool:poolLabel(index%groupCount)})); data={tournament:{name,venue,date:displayDate(date),format:'teams'},teams,matches:generatedMatches(teams),players:[],rotation:null,registrations:[],requests:[],approved:[],role,scorerName:''};
@@ -274,8 +274,8 @@ const legacyRenderPairInputs=renderPairInputs;
 renderPairInputs=function(format=$('#newFormat')?.value||'teams'){
   legacyRenderPairInputs(format);
   if(format==='rotation')return;
-  $('#newTournamentIntro').textContent='Add '+(playerCountForBuilder(format)/2)+' fixed pairs. Every pair will play every other pair once, then the top four enter the double-chance playoff.';
-  $('#formatBuilderHelp').textContent='Fixed doubles needs an even number of players. Every pair plays all other pairs once; there are no league groups.';
+  $('#newTournamentIntro').textContent='Add '+(playerCountForBuilder(format)/2)+' fixed pairs (maximum 10 teams). Every pair will play every other pair once, then the top four enter the double-chance playoff.';
+  $('#formatBuilderHelp').textContent='Fixed doubles supports 2–10 teams. Every pair plays all other pairs once; there are no league groups.';
   $$('.pair-number span').forEach(label=>{label.textContent='Full league';});
 }
 
@@ -399,46 +399,78 @@ function registeredPlayers(){return Array.isArray(data.registrations)?data.regis
 function registrationMode(){return new URLSearchParams(window.location.search).get('register')==='1';}
 function registrationUrl(){const shared=shareUrl();if(!shared)return '';const url=new URL(shared);url.searchParams.set('register','1');return url.toString();}
 function registrationCountLabel(count){return count+' '+(count===1?'player':'players');}
+function registrationIsFixedDoubles(){return data.tournament?.format==='teams';}
+function fixedRegistrationLimit(){return 10;}
+function normalisedTeamRegistration(entry){
+  const members=Array.isArray(entry?.players)?entry.players:entry?.first&&entry?.second?[entry.first,entry.second]:[];
+  const names=members.map(member=>typeof member==='string'?member:member?.name).filter(Boolean);
+  return names.length===2?{id:entry.id||names.join('::'),players:names,name:names.join(' & ')}:null;
+}
+function registeredTeams(){
+  const entries=registeredPlayers(),teams=entries.map(normalisedTeamRegistration).filter(Boolean),legacy=entries.filter(entry=>entry?.name&&!normalisedTeamRegistration(entry));
+  for(let index=0;index+1<legacy.length;index+=2)teams.push({id:legacy[index].id+'::'+legacy[index+1].id,players:[legacy[index].name,legacy[index+1].name],name:legacy[index].name+' & '+legacy[index+1].name});
+  return teams;
+}
+function registeredPlayerRoster(){
+  return registeredPlayers().flatMap(entry=>{
+    const team=normalisedTeamRegistration(entry);
+    if(team)return team.players.map(name=>({name,experience:'intermediate'}));
+    return entry?.name?[{name:entry.name,experience:EXPERIENCE_SCORE[entry.experience]?entry.experience:'intermediate'}]:[];
+  });
+}
+function registrationTeamCountLabel(count){return count+' '+(count===1?'team':'teams');}
 function updateRegistrationBuilderNote(){
-  const entries=registeredPlayers(),note=$('#registrationBuilderNote'),count=$('#registeredPlayerCount'),loader=$('#loadRegistrationsButton');
+  const roster=registeredPlayerRoster(),teams=registeredTeams(),fixedSignup=registrationIsFixedDoubles(),note=$('#registrationBuilderNote'),count=$('#registeredPlayerCount'),loader=$('#loadRegistrationsButton');
   if(!note||!count||!loader)return;
-  count.textContent=registrationCountLabel(entries.length);
-  loader.disabled=entries.length===0;
-  if(!entries.length){note.textContent='Share the player sign-up link from Tournament setup to collect names and skill levels.';return;}
+  count.textContent=fixedSignup?registrationTeamCountLabel(teams.length)+' · '+registrationCountLabel(roster.length):registrationCountLabel(roster.length);
+  loader.disabled=roster.length===0;
+  if(!roster.length){note.textContent='Share the player sign-up link from Tournament setup to collect names and skill levels.';return;}
   const format=$('#newFormat')?.value||'teams';
-  if(entries.length<4){note.textContent=registrationCountLabel(entries.length)+' registered. Add at least '+(4-entries.length)+' more before creating a tournament.';return;}
-  if(format==='rotation'){note.textContent=registrationCountLabel(entries.length)+' ready. Loading them keeps their selected experience levels.';return;}
-  note.textContent=registrationCountLabel(entries.length)+' ready. Fixed doubles pairs are filled in sign-up order; you can edit the pairings before creating the tournament.'+(entries.length%2?' Add one more player to complete the final pair.':'');
+  if(roster.length<4){note.textContent=registrationCountLabel(roster.length)+' registered. Add at least '+(4-roster.length)+' more before creating a tournament.';return;}
+  if(format==='rotation'){note.textContent=registrationCountLabel(roster.length)+' ready. Loading them keeps their selected experience levels.';return;}
+  if(fixedSignup){note.textContent=registrationTeamCountLabel(teams.length)+' ready. Their submitted pairings will be loaded into fixed doubles.';return;}
+  note.textContent=registrationCountLabel(roster.length)+' ready. Fixed doubles pairs are filled in sign-up order; you can edit the pairings before creating the tournament.'+(roster.length%2?' Add one more player to complete the final pair.':'');
 }
 function renderRegistrationControls(){
-  const entries=registeredPlayers(),summary=$('#registrationSummary'),copy=$('#copyRegistrationLinkButton');
+  const entries=registeredPlayers(),teams=registeredTeams(),summary=$('#registrationSummary'),copy=$('#copyRegistrationLinkButton');
   if(summary){
     if(!entries.length)summary.textContent='No players have registered yet.';
+    else if(registrationIsFixedDoubles()){const names=teams.slice(0,5).map(team=>team.name).join(' · '),extra=teams.length>5?' +' +(teams.length-5)+' more':'';summary.textContent=registrationTeamCountLabel(teams.length)+' of '+fixedRegistrationLimit()+' registered · '+Math.max(0,fixedRegistrationLimit()-teams.length)+' team spots left'+(names?': '+names+extra+'.':'.');}
     else{const names=entries.slice(0,6).map(person=>person.name).join(' · '),extra=entries.length>6?' +' +(entries.length-6)+' more':'';summary.textContent=registrationCountLabel(entries.length)+' registered: '+names+extra+'.';}
   }
   if(copy)copy.disabled=!cloud.tournamentId;
   updateRegistrationBuilderNote();
   if(registrationMode()&&cloud.ready&&cloud.tournamentId&&!registrationAutoOpened){registrationAutoOpened=true;openRegistrationDialog();}
+  else if(registrationMode()&&$('#registrationDialog')?.open)updateRegistrationDialog();
+}
+function updateRegistrationDialog(){
+  const fixed=registrationIsFixedDoubles(),teamCount=registeredTeams().length,spotsLeft=Math.max(0,fixedRegistrationLimit()-teamCount),secondLabel=$('#registrationSecondPlayerLabel'),experienceLabel=$('#registrationExperienceLabel'),partner=$('#registrationPartnerName'),submit=$('#registrationSubmitButton');
+  $('#registrationTitle').innerHTML=fixed?'Register your<br /><em>team.</em>':'Join the<br /><em>tournament.</em>';
+  $('#registrationFirstPlayerLabel').firstChild.textContent=fixed?'Player 1':'Your name';
+  $('#registrationName').placeholder=fixed?'First player name':'Your name';
+  secondLabel.hidden=!fixed;experienceLabel.hidden=fixed;partner.required=fixed;
+  if(fixed){$('#registrationTournament').textContent=teamCount+' of '+fixedRegistrationLimit()+' teams registered · '+spotsLeft+' team spots left. Add both player names to hold a team spot.';submit.textContent=spotsLeft?'Register team →':'All team spots filled';submit.disabled=!spotsLeft;}
+  else{$('#registrationTournament').textContent='Add your name and experience level for '+data.tournament.name+'. The organiser will load this list into the tournament creator.';submit.innerHTML='Add me to the list <span>→</span>';submit.disabled=false;}
 }
 function openRegistrationDialog(){
   const dialog=$('#registrationDialog');if(!dialog||dialog.open)return;
-  $('#registrationTournament').textContent='Add your name and experience level for '+data.tournament.name+'. The organiser will load this list into the tournament creator.';
-  $('#registrationMessage').textContent='';
+  updateRegistrationDialog();$('#registrationMessage').textContent='';
   dialog.showModal();
 }
 function loadRegisteredPlayersIntoBuilder(announce=false){
-  const entries=registeredPlayers(),format=$('#newFormat').value;
-  if(!entries.length){if(announce)$('#newTournamentMessage').textContent='There are no registered players to load yet.';updateRegistrationBuilderNote();return false;}
-  const playerCount=Math.max(4,format==='teams'&&entries.length%2?entries.length+1:entries.length);
+  const roster=registeredPlayerRoster(),teams=registeredTeams(),format=$('#newFormat').value,preservePairs=format==='teams'&&registrationIsFixedDoubles();
+  if(!roster.length){if(announce)$('#newTournamentMessage').textContent='There are no registered players to load yet.';updateRegistrationBuilderNote();return false;}
+  if(format==='teams'&&roster.length>20){$('#newTournamentMessage').textContent='Fixed doubles is limited to 10 teams. Use Rotation League for a larger player list.';return false;}
+  const playerCount=Math.max(4,format==='teams'&&roster.length%2?roster.length+1:roster.length);
   $('#newPlayerCount').value=playerCount;
   renderPairInputs(format);
   if(format==='rotation'){
-    $$('[data-rotation-player]').forEach((input,index)=>{const entry=entries[index];if(!entry)return;input.value=entry.name;const level=$('[data-rotation-level="'+index+'"]');if(level)level.value=EXPERIENCE_SCORE[entry.experience]?entry.experience:'intermediate';});
+    $$('[data-rotation-player]').forEach((input,index)=>{const entry=roster[index];if(!entry)return;input.value=entry.name;const level=$('[data-rotation-level="'+index+'"]');if(level)level.value=EXPERIENCE_SCORE[entry.experience]?entry.experience:'intermediate';});
   }else{
-    $$('[data-player]').forEach((input,index)=>{if(entries[index])input.value=entries[index].name;});
+    const names=preservePairs?teams.flatMap(team=>team.players):roster.map(entry=>entry.name);$$('[data-player]').forEach((input,index)=>{if(names[index])input.value=names[index];});
   }
   updateRegistrationBuilderNote();
-  if(announce)$('#newTournamentMessage').textContent=registrationCountLabel(entries.length)+' loaded from the sign-up list.';
+  if(announce)$('#newTournamentMessage').textContent=(preservePairs?registrationTeamCountLabel(teams.length):registrationCountLabel(roster.length))+' loaded from the sign-up list.';
   return true;
 }
 function openNewTournament(){
@@ -459,11 +491,20 @@ $('#newFormat').addEventListener('change',updateRegistrationBuilderNote);
 $('#newPlayerCount').addEventListener('input',updateRegistrationBuilderNote);
 $('#registrationForm').addEventListener('submit',event=>{
   event.preventDefault();
-  const name=$('#registrationName').value.trim(),experience=$('#registrationExperience').value,message=$('#registrationMessage');
+  const name=$('#registrationName').value.trim(),partner=$('#registrationPartnerName').value.trim(),experience=$('#registrationExperience').value,message=$('#registrationMessage'),fixed=registrationIsFixedDoubles();
   if(!name){message.textContent='Please enter your name.';return;}
-  if(!EXPERIENCE_SCORE[experience]){message.textContent='Please select your experience level.';return;}
   if(!cloud.tournamentId){message.textContent='This player sign-up link is not connected to a live tournament yet.';return;}
   data.registrations=registeredPlayers();
+  if(fixed){
+    if(!partner){message.textContent='Please enter both player names for the team.';return;}
+    if(name.toLocaleLowerCase()===partner.toLocaleLowerCase()){message.textContent='Please enter two different player names.';return;}
+    if(registeredTeams().length>=fixedRegistrationLimit()){message.textContent='All '+fixedRegistrationLimit()+' team spots are full.';return;}
+    const existingNames=new Set(registeredPlayerRoster().map(player=>player.name.toLocaleLowerCase()));
+    if(existingNames.has(name.toLocaleLowerCase())||existingNames.has(partner.toLocaleLowerCase())){message.textContent='One of these players is already registered on a team.';return;}
+    data.registrations.push({id:(crypto.randomUUID?crypto.randomUUID():'team-'+Date.now()+'-'+Math.random().toString(36).slice(2)),kind:'team',players:[{name},{name:partner}],createdAt:new Date().toISOString()});
+    message.textContent='Team registered. '+Math.max(0,fixedRegistrationLimit()-registeredTeams().length)+' team spots remain.';$('#registrationName').value='';$('#registrationPartnerName').value='';save();renderRegistrationControls();return;
+  }
+  if(!EXPERIENCE_SCORE[experience]){message.textContent='Please select your experience level.';return;}
   const existing=data.registrations.find(person=>person.name.toLocaleLowerCase()===name.toLocaleLowerCase());
   if(existing){existing.name=name;existing.experience=experience;message.textContent='Your registration has been updated.';}
   else{data.registrations.push({id:(crypto.randomUUID?crypto.randomUUID():'registration-'+Date.now()+'-'+Math.random().toString(36).slice(2)),name,experience,createdAt:new Date().toISOString()});message.textContent='You are on the player list.';}
