@@ -350,3 +350,44 @@ function renderPodium(){
   $('#winnerName').textContent=podium.winner;$('#runnerName').textContent=podium.runner;$('#podiumScore').textContent=podium.detail;
 }
 function renderAll(){if(!isRotation()){ensureSingleLeague();syncFixedPlayoffs();}renderTournamentMeta();renderNext();renderStats();renderFixtures();renderStandings();renderBracket();renderRole();renderRules();renderRequests();renderPodium();}
+var selectedFixtureTeamId='';
+function renderTeamFixturePicker(){
+  const button=$('.filter-tab[data-filter="team"]'),control=$('#teamFixtureControl'),select=$('#teamFixtureSelect');
+  if(isRotation()){
+    if(activeFilter==='team')activeFilter='all';
+    if(button)button.hidden=true;
+    if(control)control.hidden=true;
+    return;
+  }
+  if(button)button.hidden=false;
+  if(!control||!select)return;
+  control.hidden=activeFilter!=='team';
+  const oldValue=selectedFixtureTeamId;
+  select.textContent='';
+  const prompt=document.createElement('option');prompt.value='';prompt.textContent='Choose a team';select.append(prompt);
+  data.teams.forEach(item=>{const option=document.createElement('option');option.value=item.id;option.textContent=item.name;select.append(option);});
+  if(data.teams.some(item=>item.id===oldValue))select.value=oldValue;
+  select.onchange=()=>{selectedFixtureTeamId=select.value;renderFixtures();};
+}
+function fixtureTeamLine(item,score,index){
+  const row=document.createElement('div'),name=document.createElement('span'),dot=document.createElement('i'),points=document.createElement('span');
+  row.className='fixture-team';name.className='name';dot.className='fixture-dot';points.className='fixture-score';name.append(dot,document.createTextNode(item.name));points.textContent=score;
+  row.append(name,points);return row;
+}
+function renderFixtures(){
+  renderTeamFixturePicker();
+  if(isRotation()){renderRotationFixtures();return;}
+  $('#fixtureFormatNote').textContent='1 game · 21 points';$('#fixturesEyebrow').innerHTML='<span></span> League stage';$('#fixturesTitle').textContent=activeFilter==='team'?'Selected team fixtures':'League fixtures';
+  const statusCopy={live:'LIVE NOW',upcoming:'UP NEXT',complete:'PLAYED'},list=$('#fixturesList');
+  list.textContent='';
+  const visible=data.matches.filter(match=>activeFilter==='team'?selectedFixtureTeamId&&(match.a===selectedFixtureTeamId||match.b===selectedFixtureTeamId):activeFilter==='all'||match.status===activeFilter);
+  if(activeFilter==='team'&&!selectedFixtureTeamId){const message=document.createElement('p');message.className='team-filter-empty';message.textContent='Choose a team above to see its fixtures.';list.append(message);return;}
+  if(activeFilter==='team'&&visible.length===0){const message=document.createElement('p');message.className='team-filter-empty';message.textContent='No fixtures have been generated for this team yet.';list.append(message);return;}
+  visible.forEach(match=>{
+    const card=document.createElement('article'),meta=document.createElement('div'),teams=document.createElement('div'),action=document.createElement('div'),button=document.createElement('button');
+    card.className='fixture-item '+match.status;meta.className='fixture-meta';meta.innerHTML='<b>'+statusCopy[match.status]+'</b>'+match.time+'<br>'+match.court;
+    teams.className='fixture-teams';teams.append(fixtureTeamLine(team(match.a),match.games[0]?match.games.map(score=>score[0]).join(' '):'',0),fixtureTeamLine(team(match.b),match.games[0]?match.games.map(score=>score[1]).join(' '):'',1));
+    action.className='fixture-action';button.className='score-edit';button.dataset.matchId=match.id;button.textContent=match.status==='complete'?'Edit score':'Enter score';button.onclick=()=>openScore(match.id);action.append(button);
+    card.append(meta,teams,action);list.append(card);
+  });
+}
